@@ -1,0 +1,22 @@
+
+
+
+COMPILER MIEC
+
+ 
+
+CHARACTERS
+  
+    
+TOKENS
+  
+    
+COMMENTS
+  FROM "(*" TO "*)" NESTED
+   
+PRODUCTIONS
+
+MIEC = .
+
+
+END MIEC .
