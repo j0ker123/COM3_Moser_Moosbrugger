@@ -1,0 +1,6 @@
+PROGRAM Example2
+BEGIN
+	b := anton
+	;
+	print(2 * 3 + 4);
+END

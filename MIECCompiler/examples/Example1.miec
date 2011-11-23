@@ -1,0 +1,12 @@
+PROGRAM Example1
+	BEGIN_VAR
+		i: Integer;
+	END_VAR
+BEGIN
+	i := 0;
+	WHILE i < 10 DO
+		IF i - (i / 2) * 2 = 0 THEN		(* i % 2 == 0 *)
+			print(i);
+		END
+	END
+END
