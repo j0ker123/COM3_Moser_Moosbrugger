@@ -63,6 +63,137 @@ bool Parser::WeakSeparator(int n, int syFol, int repFol) {
 }
 
 void Parser::MIEC() {
+		Expect(3);
+		Expect(1);
+		if (la->kind == 6) {
+			VarDecl();
+		}
+		Expect(4);
+		Statements();
+		Expect(5);
+}
+
+void Parser::VarDecl() {
+		Expect(6);
+		Expect(1);
+		Expect(7);
+		Expect(8);
+		Expect(9);
+		while (la->kind == 1) {
+			Get();
+			Expect(7);
+			Expect(8);
+			Expect(9);
+		}
+		Expect(10);
+}
+
+void Parser::Statements() {
+		Stat();
+		while (StartOf(1)) {
+			Stat();
+		}
+}
+
+void Parser::Stat() {
+		if (la->kind == 1) {
+			Get();
+			Expect(11);
+			Expr();
+			Expect(9);
+		} else if (la->kind == 12) {
+			Get();
+			Expect(13);
+			Expr();
+			Expect(14);
+			Expect(9);
+		} else if (la->kind == 15) {
+			Get();
+			Condition();
+			Expect(16);
+			Statements();
+			Expect(5);
+		} else if (la->kind == 17) {
+			Get();
+			Condition();
+			Expect(18);
+			Statements();
+			Expect(19);
+			Statements();
+			Expect(5);
+		} else SynErr(31);
+}
+
+void Parser::Expr() {
+		Term();
+		while (la->kind == 20 || la->kind == 21) {
+			if (la->kind == 20) {
+				Get();
+			} else {
+				Get();
+			}
+			Term();
+		}
+}
+
+void Parser::Condition() {
+		Expr();
+		Relop();
+		Expr();
+}
+
+void Parser::Term() {
+		Fact();
+		while (la->kind == 22 || la->kind == 23) {
+			if (la->kind == 22) {
+				Get();
+			} else {
+				Get();
+			}
+			Fact();
+		}
+}
+
+void Parser::Fact() {
+		if (la->kind == 1) {
+			Get();
+		} else if (la->kind == 2) {
+			Get();
+		} else if (la->kind == 13) {
+			Get();
+			Expr();
+			Expect(14);
+		} else SynErr(32);
+}
+
+void Parser::Relop() {
+		switch (la->kind) {
+		case 24: {
+			Get();
+			break;
+		}
+		case 25: {
+			Get();
+			break;
+		}
+		case 26: {
+			Get();
+			break;
+		}
+		case 27: {
+			Get();
+			break;
+		}
+		case 28: {
+			Get();
+			break;
+		}
+		case 29: {
+			Get();
+			break;
+		}
+		default: SynErr(33); break;
+		}
 }
 
 
@@ -78,7 +209,7 @@ void Parser::Parse() {
 }
 
 Parser::Parser(Scanner *scanner) {
-	maxT = 1;
+	maxT = 30;
 
 	dummyToken = NULL;
 	t = la = NULL;
@@ -92,8 +223,9 @@ bool Parser::StartOf(int s) {
 	const bool T = true;
 	const bool x = false;
 
-	static bool set[1][3] = {
-		{T,x,x}
+	static bool set[2][32] = {
+		{T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x},
+		{x,T,x,x, x,x,x,x, x,x,x,x, T,x,x,T, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x}
 	};
 
 
@@ -114,7 +246,39 @@ void Errors::SynErr(int line, int col, int n) {
 	wchar_t* s;
 	switch (n) {
 			case 0: s = coco_string_create(L"EOF expected"); break;
-			case 1: s = coco_string_create(L"??? expected"); break;
+			case 1: s = coco_string_create(L"ident expected"); break;
+			case 2: s = coco_string_create(L"number expected"); break;
+			case 3: s = coco_string_create(L"\"program\" expected"); break;
+			case 4: s = coco_string_create(L"\"BEGIN\" expected"); break;
+			case 5: s = coco_string_create(L"\"END\" expected"); break;
+			case 6: s = coco_string_create(L"\"BEGIN_VAR\" expected"); break;
+			case 7: s = coco_string_create(L"\":\" expected"); break;
+			case 8: s = coco_string_create(L"\"Integer\" expected"); break;
+			case 9: s = coco_string_create(L"\";\" expected"); break;
+			case 10: s = coco_string_create(L"\"END_VAR\" expected"); break;
+			case 11: s = coco_string_create(L"\":=\" expected"); break;
+			case 12: s = coco_string_create(L"\"print\" expected"); break;
+			case 13: s = coco_string_create(L"\"(\" expected"); break;
+			case 14: s = coco_string_create(L"\")\" expected"); break;
+			case 15: s = coco_string_create(L"\"WHILE\" expected"); break;
+			case 16: s = coco_string_create(L"\"DO\" expected"); break;
+			case 17: s = coco_string_create(L"\"IF\" expected"); break;
+			case 18: s = coco_string_create(L"\"THEN\" expected"); break;
+			case 19: s = coco_string_create(L"\"ELSE\" expected"); break;
+			case 20: s = coco_string_create(L"\"+\" expected"); break;
+			case 21: s = coco_string_create(L"\"-\" expected"); break;
+			case 22: s = coco_string_create(L"\"*\" expected"); break;
+			case 23: s = coco_string_create(L"\"/\" expected"); break;
+			case 24: s = coco_string_create(L"\"=\" expected"); break;
+			case 25: s = coco_string_create(L"\"<=\" expected"); break;
+			case 26: s = coco_string_create(L"\">=\" expected"); break;
+			case 27: s = coco_string_create(L"\"!=\" expected"); break;
+			case 28: s = coco_string_create(L"\"<\" expected"); break;
+			case 29: s = coco_string_create(L"\">\" expected"); break;
+			case 30: s = coco_string_create(L"??? expected"); break;
+			case 31: s = coco_string_create(L"invalid Stat"); break;
+			case 32: s = coco_string_create(L"invalid Fact"); break;
+			case 33: s = coco_string_create(L"invalid Relop"); break;
 
 		default:
 		{

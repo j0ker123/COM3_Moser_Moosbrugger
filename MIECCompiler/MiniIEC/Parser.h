@@ -26,7 +26,9 @@ public:
 class Parser {
 private:
 	enum {
-		_EOF=0
+		_EOF=0,
+		_ident=1,
+		_number=2
 	};
 	int maxT;
 
@@ -55,6 +57,14 @@ public:
 	void SemErr(const wchar_t* msg);
 
 	void MIEC();
+	void VarDecl();
+	void Statements();
+	void Stat();
+	void Expr();
+	void Condition();
+	void Term();
+	void Fact();
+	void Relop();
 
 	void Parse();
 
