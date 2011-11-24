@@ -40,7 +40,7 @@ Statements =
 Stat = ident ":=" Expr ";"
 	| "print" "(" Expr ")" ";"
 	| "WHILE" Condition "DO" Statements "END"
-	| "IF" Condition "THEN" Statements ("ELSE" Statements) "END"
+	| "IF" Condition "THEN" Statements ["ELSE" Statements] "END"
 	.
 
 Expr = Term { ("+"|"-") Term }
@@ -55,7 +55,7 @@ Fact = ident
 	.
 
 Condition = Expr Relop Expr
-.
+	.
 
 Relop = "="
 	| "<="

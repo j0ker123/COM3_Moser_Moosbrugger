@@ -435,7 +435,7 @@ void Scanner::Init() {
 	start.set(62, 28);
 	start.set(33, 22);
 		start.set(Buffer::EoF, -1);
-	keywords.set(L"program", 3);
+	keywords.set(L"PROGRAM", 3);
 	keywords.set(L"BEGIN", 4);
 	keywords.set(L"END", 5);
 	keywords.set(L"Integer", 8);

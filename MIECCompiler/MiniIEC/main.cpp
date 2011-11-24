@@ -10,30 +10,30 @@ using namespace std;
 
 int main(int argc, char* argv[])
 {	
-	//FILE* pFile = fopen(argv[1], "r");
-
-	Parser* parser;
-	FILE* pFile;
-
-	for( int i = 1; i < argc; i++ )
-	{
-		pFile = fopen(argv[i], "r");
-
-		parser = new Parser( new Scanner( pFile ) );
-		parser->Parse();
-
-		cout << "parse file: " << argv[i] << endl;
-		cout << "count errors: " << parser->errors->count << endl;
+	if (argc < 2) {
+		cout << "Usage: <program>.exe <path-to-miec>.miec {<path-to-miec>.miec}" << endl;
+		return EXIT_FAILURE;
 	}
 
-	
-	//Scanner* scan = new Scanner( pFile );
-	//
-	//Parser* parser = new Parser( scan );
+	FILE* pFile = 0;
+	for( int i = 1; i < argc; i++ )
+	{
+		cout << "parse file: " << argv[i] << endl;
 
-	//parser->Parse();
+		pFile = fopen(argv[i], "r");
+		if (pFile == 0) 
+		{
+			cout << "Error opening file!" << endl;
+		}
+		else
+		{
+			Parser* parser = new Parser( new Scanner( pFile ) );
+			parser->Parse();
 
-	//cout << "count errors: " << parser->errors->count << endl;
+			cout << "count errors: " << parser->errors->count << endl;
+		}
+		cout << endl;
+	}
 
 	getchar();
 

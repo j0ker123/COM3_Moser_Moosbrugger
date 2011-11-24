@@ -118,8 +118,10 @@ void Parser::Stat() {
 			Condition();
 			Expect(18);
 			Statements();
-			Expect(19);
-			Statements();
+			if (la->kind == 19) {
+				Get();
+				Statements();
+			}
 			Expect(5);
 		} else SynErr(31);
 }
@@ -248,7 +250,7 @@ void Errors::SynErr(int line, int col, int n) {
 			case 0: s = coco_string_create(L"EOF expected"); break;
 			case 1: s = coco_string_create(L"ident expected"); break;
 			case 2: s = coco_string_create(L"number expected"); break;
-			case 3: s = coco_string_create(L"\"program\" expected"); break;
+			case 3: s = coco_string_create(L"\"PROGRAM\" expected"); break;
 			case 4: s = coco_string_create(L"\"BEGIN\" expected"); break;
 			case 5: s = coco_string_create(L"\"END\" expected"); break;
 			case 6: s = coco_string_create(L"\"BEGIN_VAR\" expected"); break;

@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="examples">
+      <UniqueIdentifier>{92bf1c94-de72-4b47-82dc-6fca30019299}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MiniIEC\main.cpp">
@@ -37,5 +40,16 @@
     <CustomBuild Include="MiniIEC\MIEC.atg">
       <Filter>Source Files</Filter>
     </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="examples\Hello.miec">
+      <Filter>examples</Filter>
+    </None>
+    <None Include="examples\Example1.miec">
+      <Filter>examples</Filter>
+    </None>
+    <None Include="examples\Example2.miec">
+      <Filter>examples</Filter>
+    </None>
   </ItemGroup>
 </Project>

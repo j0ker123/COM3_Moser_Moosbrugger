@@ -80,7 +80,7 @@
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="MiniIEC\MIEC.atg">
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\Coco\Coco.exe %(FullPath) -o .\MiniIEC -namespace MIEC -frames .\Coco</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\Coco\Coco.exe "%(FullPath)" -o .\MiniIEC -namespace MIEC -frames .\Coco</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\MiniIEC\Scanner.h;.\MiniIEC\Sanner.cpp;.\MiniIEC\Parser.h;.\MiniIEC\Parser.cpp</Outputs>
       <FileType>Document</FileType>
     </CustomBuild>
@@ -88,6 +88,11 @@
   <ItemGroup>
     <ClInclude Include="MiniIEC\Parser.h" />
     <ClInclude Include="MiniIEC\Scanner.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="examples\Example1.miec" />
+    <None Include="examples\Example2.miec" />
+    <None Include="examples\Hello.miec" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
