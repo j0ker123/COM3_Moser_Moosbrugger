@@ -88,6 +88,8 @@
   <ItemGroup>
     <ClInclude Include="MiniIEC\Parser.h" />
     <ClInclude Include="MiniIEC\Scanner.h" />
+    <ClInclude Include="MiniIEC\Symbol.h" />
+    <ClInclude Include="MiniIEC\SymbolTable.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="examples\Example1.miec" />

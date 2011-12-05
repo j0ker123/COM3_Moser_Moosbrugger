@@ -35,6 +35,12 @@
     <ClInclude Include="MiniIEC\Scanner.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="MiniIEC\Symbol.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MiniIEC\SymbolTable.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="MiniIEC\MIEC.atg">
