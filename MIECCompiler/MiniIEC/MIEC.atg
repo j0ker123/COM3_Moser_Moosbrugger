@@ -1,7 +1,11 @@
 
+#include <assert.h>
+#include <wchar.h>
 #include "SymbolTable.h"
 
 COMPILER MIEC
+
+	enum eOp { eAdd, eSub, eMul, eDiv };
 
 	BaseType* mInteger;
 	SymbolTable mList;
@@ -24,62 +28,81 @@ IGNORE cr + lf + tab
    
 PRODUCTIONS
 
-MIEC =									
-	"PROGRAM" ident
+MIEC 
+	= "PROGRAM" ident
 		[VarDecl]
-	"BEGIN"
+	  "BEGIN"
 		Statements
-	"END"
+	  "END"
 	.
 
-VarDecl =								(. mInteger = new BaseType(BaseType::eInt); .)
-	"BEGIN_VAR"							(. std::string name; BaseType* type; size_t addr = 0; .)
-	Ident<name> ":" Type<type> ";"		(. mList.AddSymbol(new VarSym(type, name, addr), name); addr += type->GetSize(); .)
-	{Ident<name> ":" Type<type> ";" }	(. mList.AddSymbol(new VarSym(type, name, addr), name); addr += type->GetSize(); .)
-	"END_VAR"
+VarDecl									(. mInteger = new BaseType(BaseType::eInt); .)
+	= "BEGIN_VAR"						(. wchar_t* name; BaseType* type; size_t addr = 0; .)
+	  Ident<name> ":" Type<type> ";"	(. mList.AddSymbol(new VarSym(type, name, addr), name); addr += type->GetSize(); .)
+	{ Ident<name> ":" Type<type> ";"	(. mList.AddSymbol(new VarSym(type, name, addr), name); addr += type->GetSize(); .)
+	}
+	  "END_VAR"
 	.
 
-Ident<std::string &name> =
-	ident								(. name = coco_string_create_char(t->val); .)
+Statements 
+	= Stat 
+	{ Stat }
 	.
 
-Type<BaseType* &type> =
-	"Integer"							(. type = mInteger; .)
-	.
-
-Statements = 
-	Stat {Stat}
-	.
-
-Stat = ident ":=" Expr ";"
-	| "print" "(" Expr ")" ";"
+Stat									(. Symbol* pSym; wchar_t* name; SymbolType* type; .)
+	= Ident<name> ":=" Expr<type> ";"	(. pSym = mList.FindSymbol(name); assert(pSym > 0); assert(type == pSym->GetType()); .)
+	| "print" "(" Expr<type> ")" ";"
 	| "WHILE" Condition "DO" Statements "END"
 	| "IF" Condition "THEN" Statements ["ELSE" Statements] "END"
 	.
 
-Expr = Term { ("+"|"-") Term }
+Condition								(. SymbolType* type; SymbolType* type1; .)
+	= Expr<type> Relop Expr<type1>		(. /* eval: check type =?= type1 */ .)
 	.
 
-Term = Fact { ("*"|"/") Fact }
+Expr<SymbolType* &type>					(. SymbolType* type1; .)
+	= Term<type>						
+	{ ( "+"								(. eOp op = eAdd; .)
+	  | "-"								(. eOp op = eSub; .)
+	  )
+	  Term<type1>						(. assert(type == type1); .)
+	}
 	.
 
-Fact =									(. Symbol* pSym; std::string name; SymbolType* type; .)
-	Ident<name>							(. pSym = mList.FindSymbol(name); type = pSym->GetType(); .)
-	| number
-	| "(" Expr ")"
+Term<SymbolType* &type>					(. SymbolType* type1; .)
+	= Fact<type> 
+	{ ( "*"								(. eOp op = eMul; .)
+	  | "/"								(. eOp op = eDiv; .)
+	  )
+	  Fact<type1>						(. assert(type == type1); .)
+	}
 	.
 
-Condition = 
-	Expr Relop Expr
+Fact<SymbolType* &type>					(. Symbol* pSym; wchar_t* name; int val; .)
+	= Ident<name>						(. pSym = mList.FindSymbol(name); assert(pSym > 0); type = pSym->GetType(); .)
+	| Number<name, val>					(. type = mInteger; pSym = mList.AddSymbol(new ConstSym(type, name, val), name); .)
+	| "(" Expr<type> ")"
 	.
 
-Relop = 
-	"="
+Relop 
+	= "="
 	| "<="
 	| ">="
 	| "!="
 	| "<"
 	| ">"
+	.
+
+Type<BaseType* &type>
+	= "Integer"							(. type = mInteger; .)
+	.
+
+Ident<wchar_t* &name>
+	= ident								(. name = t->val; .)
+	.
+
+Number<wchar_t* &name, int &val>
+	= number							(. name = t->val; swscanf(t->val, L"%d", &val); .)
 	.
 
 END MIEC .

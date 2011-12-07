@@ -1,5 +1,6 @@
 PROGRAM Example2
 BEGIN
+	a := 1;
 	b := anton
 	;
 	print(2 * 3 + 4);

@@ -1,7 +1,7 @@
 #ifndef SYMBOL_H_
 #define SYMBOL_H_
 
-#include <string>
+#include "Scanner.h"
 
 class SymbolType
 {
@@ -40,21 +40,23 @@ private:
 class Symbol
 {
 public:
-	Symbol(SymbolType* pType, std::string const & name)
-		: mpType(pType), mName(name) { }
+	Symbol(SymbolType* pType, wchar_t* name)
+		: mpType(pType), mName(coco_string_create(name)) { }
+	~Symbol() { coco_string_delete(mName); }
+
 	SymbolType* GetType() { return mpType; }
-	std::string const & GetName() { return mName; }
+	wchar_t* GetName() { return mName; }
 private:
 	Symbol();
 
 	SymbolType* mpType;
-	std::string mName;
+	wchar_t* mName;
 };
 
 class ConstSym : public Symbol
 {
 public:
-	ConstSym(SymbolType* pType, std::string const & name, int val)
+	ConstSym(SymbolType* pType, wchar_t* name, int val)
 		: Symbol(pType, name), mVal(val) { }
 	int GetVal() { return mVal; }
 private:
@@ -64,7 +66,7 @@ private:
 class VarSym : public Symbol
 {
 public:
-	VarSym(SymbolType* pType, std::string const & name, size_t addr)
+	VarSym(SymbolType* pType, wchar_t* name, size_t addr)
 		: Symbol(pType, name), mAddr(addr) { }
 	int GetAddr() { return mAddr; }
 private:
