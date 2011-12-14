@@ -35,6 +35,7 @@ int main(int argc, char* argv[])
 		cout << endl;
 	}
 
+	cout << "Press any key . . .";
 	getchar();
 
 	return 0;

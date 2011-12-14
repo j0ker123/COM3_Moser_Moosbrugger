@@ -1,0 +1,4 @@
+PROGRAM Example3
+BEGIN
+	b := 2;
+END
