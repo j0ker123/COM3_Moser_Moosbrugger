@@ -44,8 +44,8 @@ MIEC
 
 VarDecl									(. mInteger = new BaseType(BaseType::eInt); .)
 	= "BEGIN_VAR"						(. wchar_t* name; BaseType* type; size_t addr = 0; .)
-	  Ident<name> ":" Type<type> ";"	(. mList.AddSymbol(new VarSym(type, name, addr), name); addr += type->GetSize(); .)
-	{ Ident<name> ":" Type<type> ";"	(. mList.AddSymbol(new VarSym(type, name, addr), name); addr += type->GetSize(); .)
+	  Ident<name> ":" Type<type> ";"	(. mList.AddSymbol(new VarSym(type, name, addr)); addr += type->GetSize(); .)
+	{ Ident<name> ":" Type<type> ";"	(. if (mList.FindSymbol(name) == 0) {mList.AddSymbol(new VarSym(type, name, addr)); addr += type->GetSize();} else Err(L"VarDecl: ident already defined"); .)
 	}
 	  "END_VAR"
 	.
@@ -92,7 +92,7 @@ Term<SymbolType* &type>					(. SymbolType* type1; .)
 
 Fact<SymbolType* &type>					(. Symbol* pSym; wchar_t* name; int val; .)
 	= Ident<name>						(. pSym = mList.FindSymbol(name); if (pSym == 0) {Err(L"Fact: undeclared ident"); return;} type = pSym->GetType(); .)
-	| Number<name, val>					(. type = mInteger; pSym = mList.AddSymbol(new ConstSym(type, name, val), name); .)
+	| Number<name, val>					(. type = mInteger; pSym = mList.AddSymbol(new ConstSym(type, name, val)); .)
 	| "(" Expr<type> ")"
 	.
 

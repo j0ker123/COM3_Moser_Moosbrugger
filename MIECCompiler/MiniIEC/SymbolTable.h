@@ -18,17 +18,25 @@ public:
 	typedef std::pair<wchar_t*, Symbol*> tSymbolEntry;
 	typedef std::map<wchar_t*, Symbol*, NameCompare> tSymbolList;
 
-	Symbol* AddSymbol(Symbol* pSymbol, wchar_t* const name)
+	~SymbolTable()
 	{
-		if (pSymbol == 0 || name == 0 || name == L"") { return 0; }
+		tSymbolList::iterator itor = mSymbolList.begin();
+		for (; itor != mSymbolList.end(); itor++) {
+			delete itor->second;
+		}
+		mSymbolList.clear();
+	}
 
-		std::pair<tSymbolList::iterator, bool> ret = mSymbolList.insert(tSymbolEntry(name, pSymbol));
+	Symbol* AddSymbol(Symbol* pSymbol)
+	{
+		if (pSymbol == 0 || pSymbol->GetName() == 0 || pSymbol->GetName() == L"") { return 0; }
+
+		std::pair<tSymbolList::iterator, bool> ret = mSymbolList.insert(tSymbolEntry(pSymbol->GetName(), pSymbol));
 		if (ret.second == false) 
 		{
 			// key name already in list
-			delete pSymbol; pSymbol = 0;
-
-			/* todo: error message name declared twice */
+			delete pSymbol;
+			pSymbol = ret.first->second;
 		}
 		
 		return ret.first->second;

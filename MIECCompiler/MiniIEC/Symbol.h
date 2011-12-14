@@ -37,6 +37,12 @@ private:
 	eKind mKind;
 };
 
+class LabelType : public SymbolType
+{
+public:
+private:
+};
+
 class Symbol
 {
 public:

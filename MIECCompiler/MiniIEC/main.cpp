@@ -27,10 +27,14 @@ int main(int argc, char* argv[])
 		}
 		else
 		{
-			Parser* parser = new Parser( new Scanner( pFile ) );
-			parser->Parse();
+			Scanner* pScanner = new Scanner( pFile );
+			Parser* pParser = new Parser( pScanner );
+			pParser->Parse();
 
-			cout << "count errors: " << parser->errors->count << endl;
+			cout << "count errors: " << pParser->errors->count << endl;
+
+			delete pParser; pParser = 0;
+			delete pScanner; pScanner = 0;
 		}
 		cout << endl;
 	}
