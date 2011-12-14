@@ -29,10 +29,15 @@ int main(int argc, char* argv[])
 		{
 			Scanner* pScanner = new Scanner( pFile );
 			Parser* pParser = new Parser( pScanner );
+
+			pParser->pList = new SymbolTable(pParser);
+			pParser->pDACGen = new DACGenerator(pParser);
 			pParser->Parse();
 
 			cout << "count errors: " << pParser->errors->count << endl;
 
+			delete pParser->pList; pParser->pList = 0;
+			delete pParser->pDACGen; pParser->pDACGen = 0;
 			delete pParser; pParser = 0;
 			delete pScanner; pScanner = 0;
 		}

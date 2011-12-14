@@ -5,12 +5,10 @@
 
 COMPILER MIEC
 
-	enum eOp { eAdd, eSub, eMul, eDiv };
-
 	BaseType* mInteger;
 
-	SymbolTable mList;
-	DACGenerator mDACGen;
+	SymbolTable* pList;
+	DACGenerator* pDACGen;
 
 	void Err(wchar_t* msg) {
 		errors->Error(la->line, la->col, msg);
@@ -34,7 +32,7 @@ IGNORE cr + lf + tab
    
 PRODUCTIONS
 
-MIEC 
+MIEC
 	= "PROGRAM" ident
 		[VarDecl]
 	  "BEGIN"
@@ -44,8 +42,8 @@ MIEC
 
 VarDecl									(. mInteger = new BaseType(BaseType::eInt); .)
 	= "BEGIN_VAR"						(. wchar_t* name; BaseType* type; size_t addr = 0; .)
-	  Ident<name> ":" Type<type> ";"	(. mList.AddSymbol(new VarSym(type, name, addr)); addr += type->GetSize(); .)
-	{ Ident<name> ":" Type<type> ";"	(. if (mList.FindSymbol(name) == 0) {mList.AddSymbol(new VarSym(type, name, addr)); addr += type->GetSize();} else Err(L"VarDecl: ident already defined"); .)
+	  Ident<name> ":" Type<type> ";"	(. pList->AddSymbol(new VarSym(type, name, addr)); addr += type->GetSize(); .)
+	{ Ident<name> ":" Type<type> ";"	(. if (pList->FindSymbol(name) == 0) {pList->AddSymbol(new VarSym(type, name, addr)); addr += type->GetSize();} else Err(L"VarDecl: ident already defined"); .)
 	}
 	  "END_VAR"
 	.
@@ -55,45 +53,50 @@ Statements
 	{ Stat }
 	.
 
-Stat									(. SymbolType* type; .)
-	= Assignment<type> ";"
-	| "print" "(" Expr<type> ")" ";"
+Stat									(. Symbol* pSym; .)
+	= Assignment<pSym> ";"
+	| "print" "(" Expr<pSym> ")" ";"
 	| "WHILE" Condition "DO" Statements "END"
 	| "IF" Condition "THEN" Statements ["ELSE" Statements] "END"
 	.
 
-Assignment<SymbolType* &type>			(. Symbol* pSym; wchar_t* name; .)
-	= Ident<name>						(. pSym = mList.FindSymbol(name); if (pSym == 0) {Err(L"Assignment: undeclared ident"); return;} .)
+Assignment<Symbol* &pSym>				(. wchar_t* name; Symbol* pSym1; .)
+	= Ident<name>						(. pSym = pList->FindSymbol(name); if (pSym == 0) {Err(L"Assignment: undeclared ident"); return;} .)
 	  ":="
-	  Expr<type>						(. if (type != pSym->GetType()) {Err(L"Assignment: incompatible types"); return;} .)
+	  Expr<pSym1>						(. if (pSym1 == 0) return; .)
+										(. if (pSym->GetType() != pSym1->GetType()) {Err(L"Assignment: incompatible types"); return;} .)
 	.
 
-Condition								(. SymbolType* type; SymbolType* type1; .)
-	= Expr<type> Relop Expr<type1>		(. /* TODO: check type =?= type1 */ .)
+Condition								(. Symbol* pSym; Symbol* pSym1; .)
+	= Expr<pSym> Relop Expr<pSym1>		(. /* TODO: check type =?= type1 */ .)
 	.
 
-Expr<SymbolType* &type>					(. SymbolType* type1; .)
-	= Term<type>						
-	{ ( "+"								(. eOp op = eAdd; .)
-	  | "-"								(. eOp op = eSub; .)
+Expr<Symbol* &pSym>						(. DACSymbol::OpKind op; Symbol* pSym1; .)
+	= Term<pSym>						(. if (pSym == 0) return; .)
+	{ ( "+"								(. op = DACSymbol::eAdd; .)
+	  | "-"								(. op = DACSymbol::eSubtract; .)
 	  )
-	  Term<type1>						(. if (type != type1) Err(L"Expr: incompatible types"); return; .)
+	  Term<pSym1>						(. if (pSym == 0) return; .)
+										(. if (pSym->GetType() != pSym1->GetType()) {Err(L"Expr: incompatible types"); return;}
+											pSym = pList->AddSymbol(pDACGen->AddStat(op, pSym, pSym1)); .)
 	}
 	.
 
-Term<SymbolType* &type>					(. SymbolType* type1; .)
-	= Fact<type> 
-	{ ( "*"								(. eOp op = eMul; .)
-	  | "/"								(. eOp op = eDiv; .)
+Term<Symbol* &pSym>					(. DACSymbol::OpKind op; Symbol* pSym1; .)
+	= Fact<pSym>						(. if (pSym == 0) return; .)
+	{ ( "*"								(. op = DACSymbol::eMultiply; .)
+	  | "/"								(. op = DACSymbol::eDivide; .)
 	  )
-	  Fact<type1>						(. if (type != type1) Err(L"Term: incompatible types"); return; .)
+	  Fact<pSym1>						(. if (pSym == 0) return; .)
+										(. if (pSym->GetType() != pSym1->GetType()) {Err(L"Term: incompatible types"); return;}
+											pSym = pList->AddSymbol(pDACGen->AddStat(op, pSym, pSym1)); .)
 	}
 	.
 
-Fact<SymbolType* &type>					(. Symbol* pSym; wchar_t* name; int val; .)
-	= Ident<name>						(. pSym = mList.FindSymbol(name); if (pSym == 0) {Err(L"Fact: undeclared ident"); return;} type = pSym->GetType(); .)
-	| Number<name, val>					(. type = mInteger; pSym = mList.AddSymbol(new ConstSym(type, name, val)); .)
-	| "(" Expr<type> ")"
+Fact<Symbol* &pSym>						(. wchar_t* name; int val; .)
+	= Ident<name>						(. pSym = pList->FindSymbol(name); if (pSym == 0) {Err(L"Fact: undeclared ident"); return;} .)
+	| Number<name, val>					(. pSym = pList->AddSymbol(new ConstSym(mInteger, name, val)); .)
+	| "(" Expr<pSym> ")"
 	.
 
 Relop 

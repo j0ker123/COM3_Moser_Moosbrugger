@@ -3,6 +3,7 @@
 
 #include <map>
 #include <functional>
+#include "Parser.h"
 #include "Symbol.h"
 
 class SymbolTable
@@ -18,6 +19,8 @@ public:
 	typedef std::pair<wchar_t*, Symbol*> tSymbolEntry;
 	typedef std::map<wchar_t*, Symbol*, NameCompare> tSymbolList;
 
+	SymbolTable(MIEC::Parser* pParser)
+		: mpParser(pParser) { }
 	~SymbolTable()
 	{
 		tSymbolList::iterator itor = mSymbolList.begin();
@@ -27,7 +30,7 @@ public:
 		mSymbolList.clear();
 	}
 
-	Symbol* AddSymbol(Symbol* pSymbol)
+	Symbol* const AddSymbol(Symbol* pSymbol)
 	{
 		if (pSymbol == 0 || pSymbol->GetName() == 0 || pSymbol->GetName() == L"") { return 0; }
 
@@ -42,7 +45,7 @@ public:
 		return ret.first->second;
 	}
 
-	Symbol* FindSymbol(wchar_t* const name) 
+	Symbol* const FindSymbol(wchar_t* const name) 
 	{
 		if (name == 0 || name == L"") { return 0; }
 
@@ -53,6 +56,7 @@ public:
 	}
 
 private:
+	MIEC::Parser* mpParser;
 	tSymbolList mSymbolList;
 };
 
