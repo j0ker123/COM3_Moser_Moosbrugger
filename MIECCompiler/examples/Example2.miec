@@ -1,7 +1,9 @@
 PROGRAM Example2
+	BEGIN_VAR
+		a: Integer;
+	END_VAR
 BEGIN
-	a := 1;
-	b := anton
+	a := anton
 	;
 	print(2 * 3 + 4);
 END

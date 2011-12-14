@@ -41,6 +41,12 @@
     <ClInclude Include="MiniIEC\SymbolTable.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="MiniIEC\DACSymbol.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MiniIEC\DACGenerator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="MiniIEC\MIEC.atg">
@@ -55,6 +61,12 @@
       <Filter>examples</Filter>
     </None>
     <None Include="examples\Example2.miec">
+      <Filter>examples</Filter>
+    </None>
+    <None Include="examples\Example3.miec">
+      <Filter>examples</Filter>
+    </None>
+    <None Include="examples\Example4.miec">
       <Filter>examples</Filter>
     </None>
   </ItemGroup>

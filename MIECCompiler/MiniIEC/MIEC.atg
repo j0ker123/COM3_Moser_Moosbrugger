@@ -63,7 +63,7 @@ Stat									(. SymbolType* type; .)
 	.
 
 Assignment<SymbolType* &type>			(. Symbol* pSym; wchar_t* name; .)
-	= Ident<name>						(. pSym = mList.FindSymbol(name); if (pSym == 0) {Err(wcscat(L"Assignment: undeclared ident", name)); return;} .)
+	= Ident<name>						(. pSym = mList.FindSymbol(name); if (pSym == 0) {Err(L"Assignment: undeclared ident"); return;} .)
 	  ":="
 	  Expr<type>						(. if (type != pSym->GetType()) {Err(L"Assignment: incompatible types"); return;} .)
 	.

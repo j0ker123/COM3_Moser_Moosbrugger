@@ -86,6 +86,8 @@
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="MiniIEC\DACGenerator.h" />
+    <ClInclude Include="MiniIEC\DACSymbol.h" />
     <ClInclude Include="MiniIEC\Parser.h" />
     <ClInclude Include="MiniIEC\Scanner.h" />
     <ClInclude Include="MiniIEC\Symbol.h" />
@@ -94,6 +96,8 @@
   <ItemGroup>
     <None Include="examples\Example1.miec" />
     <None Include="examples\Example2.miec" />
+    <None Include="examples\Example3.miec" />
+    <None Include="examples\Example4.miec" />
     <None Include="examples\Hello.miec" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
