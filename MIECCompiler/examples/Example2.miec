@@ -1,9 +1,16 @@
+(* example with errors *)
+
 PROGRAM Example2
 	BEGIN_VAR
 		a: Integer;
+		a: Integer;
 	END_VAR
 BEGIN
-	a := anton
-	;
+	b := a;
+	a := anton;
+
 	print(2 * 3 + 4);
+	print(peter)
+	print(a h);
+	print(a);
 END

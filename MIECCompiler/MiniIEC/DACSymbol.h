@@ -10,7 +10,7 @@ class DACSymbol : public Symbol
 public:
 	enum OpKind { 
 		eAdd, eSubtract, eMultiply, eDivide,
-		eIsEqual, eIsLessEqual, eIsGreaterEqual, eIsNotEqual, eIsLess, eIsGreater,
+		eIsEqual, eIsNotEqual, eIsLessEqual, eIsGreaterEqual, eIsLess, eIsGreater,
 		eAssign, eJump, eIfJump, eIfFalseJump, ePrint, eExit };
 
 	DACSymbol(SymbolType* pType, wchar_t* name, OpKind operation, Symbol* pArg1, Symbol* pArg2)

@@ -53,23 +53,35 @@ Statements
 	{ Stat }
 	.
 
-Stat									(. Symbol* pSym; .)
-	= Assignment<pSym> ";"
-	| "print" "(" Expr<pSym> ")" ";"	(. pSym = pList->AddSymbol(pDACGen->AddStat(DACSymbol::ePrint, pSym, 0)); .)
-	| "WHILE" Condition<pSym>			(. if (pSym == 0 /* TODO: || pSym->GetType() != boolean */) Err(L"Stat: invalid condition"); .)
-	  "DO" Statements
-	  "END"
-	| "IF" Condition<pSym>				(. if (pSym == 0 /* TODO: || pSym->GetType() != boolean */) Err(L"Stat: invalid condition"); .)
+Stat									(. Symbol* pSym = 0; .)
+	= Assignment<pSym>
+	| Branch<pSym>
+	| Loop<pSym>
+	| Print<pSym>
+	.
+
+Assignment<Symbol* &pSym>				(. wchar_t* name; Symbol* pSym1; .)
+	= Ident<name>						(. pSym = pList->FindSymbol(name); /*if (pSym == 0) Err(L"Assignment: undefined ident");*/ .)
+	  ":=" 
+	  Expr<pSym1> ";"					(. pSym = pList->AddSymbol(pDACGen->AddStat(DACSymbol::eAssign, pSym, pSym1)); .)
+	.
+
+Branch<Symbol* &pSym>
+	= "IF" Condition<pSym>				(. if (pSym == 0 /* TODO: || pSym->GetType() != boolean */) Err(L"Stat: invalid condition"); .)
 	  "THEN" Statements 
 	  [ "ELSE" Statements
 	  ] 
 	  "END"
 	.
 
-Assignment<Symbol* &pSym>				(. wchar_t* name; Symbol* pSym1; .)
-	= Ident<name>						(. pSym = pList->FindSymbol(name); if (pSym == 0) Err(L"Assignment: undefined ident"); .)
-	  ":="								(. DACSymbol::OpKind op = DACSymbol::eAssign; .)
-	  Expr<pSym1>						(. pSym = pList->AddSymbol(pDACGen->AddStat(op, pSym, pSym1)); .)
+Loop<Symbol* &pSym>
+	= "WHILE" Condition<pSym>			(. if (pSym == 0 /* TODO: || pSym->GetType() != boolean */) Err(L"Stat: invalid condition"); .)
+	  "DO" Statements
+	  "END"
+	.
+
+Print<Symbol* &pSym>
+	= "print" "(" Expr<pSym> ")" ";"	(. pSym = pList->AddSymbol(pDACGen->AddStat(DACSymbol::ePrint, pSym, 0)); .)
 	.
 
 Condition<Symbol* &pSym>				(. DACSymbol::OpKind op; Symbol* pSym1; .)
@@ -77,7 +89,7 @@ Condition<Symbol* &pSym>				(. DACSymbol::OpKind op; Symbol* pSym1; .)
 	.
 
 Expr<Symbol* &pSym>						(. DACSymbol::OpKind op; Symbol* pSym1; .)
-	= Term<pSym>						(. if (pSym == 0) return; .)
+	= Term<pSym>						(. /*if (pSym == 0) Err(L"Expr: invalid term");*/ .)
 	{ ( "+"								(. op = DACSymbol::eAdd; .)
 	  | "-"								(. op = DACSymbol::eSubtract; .)
 	  )
@@ -85,8 +97,8 @@ Expr<Symbol* &pSym>						(. DACSymbol::OpKind op; Symbol* pSym1; .)
 	}
 	.
 
-Term<Symbol* &pSym>					(. DACSymbol::OpKind op; Symbol* pSym1; .)
-	= Fact<pSym>						(. if (pSym == 0) return; .)
+Term<Symbol* &pSym>						(. DACSymbol::OpKind op; Symbol* pSym1; .)
+	= Fact<pSym>						(. /*if (pSym == 0) Err(L"Term: invalid fact");*/ .)
 	{ ( "*"								(. op = DACSymbol::eMultiply; .)
 	  | "/"								(. op = DACSymbol::eDivide; .)
 	  )
@@ -95,7 +107,7 @@ Term<Symbol* &pSym>					(. DACSymbol::OpKind op; Symbol* pSym1; .)
 	.
 
 Fact<Symbol* &pSym>						(. wchar_t* name; int val; .)
-	= Ident<name>						(. pSym = pList->FindSymbol(name); if (pSym == 0) Err(L"Fact: undefined ident"); .)
+	= Ident<name>						(. pSym = pList->FindSymbol(name); /*if (pSym == 0) Err(L"Fact: undefined ident");*/ .)
 	| Number<name, val>					(. pSym = pList->AddSymbol(new ConstSym(mInteger, name, val)); .)
 	| "(" Expr<pSym> ")"
 	.

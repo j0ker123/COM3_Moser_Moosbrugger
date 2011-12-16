@@ -1,8 +1,11 @@
+(* example without errors *)
+
 PROGRAM Example3
 	BEGIN_VAR
 		a: Integer;
-		a: Integer;
+		b: Integer;
 	END_VAR
 BEGIN
-	b := 2;
+	b := 2
+	;
 END
