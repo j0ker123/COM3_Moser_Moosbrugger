@@ -34,7 +34,7 @@ PRODUCTIONS
 
 MIEC
 	= "PROGRAM" ident
-		[VarDecl]
+		[ VarDecl ]
 	  "BEGIN"
 		Statements
 	  "END"
@@ -55,20 +55,25 @@ Statements
 
 Stat									(. Symbol* pSym; .)
 	= Assignment<pSym> ";"
-	| "print" "(" Expr<pSym> ")" ";"
-	| "WHILE" Condition "DO" Statements "END"
-	| "IF" Condition "THEN" Statements ["ELSE" Statements] "END"
+	| "print" "(" Expr<pSym> ")" ";"	(. pSym = pList->AddSymbol(pDACGen->AddStat(DACSymbol::ePrint, pSym, 0)); .)
+	| "WHILE" Condition<pSym>			(. if (pSym == 0 /* TODO: || pSym->GetType() != boolean */) Err(L"Stat: invalid condition"); .)
+	  "DO" Statements
+	  "END"
+	| "IF" Condition<pSym>				(. if (pSym == 0 /* TODO: || pSym->GetType() != boolean */) Err(L"Stat: invalid condition"); .)
+	  "THEN" Statements 
+	  [ "ELSE" Statements
+	  ] 
+	  "END"
 	.
 
 Assignment<Symbol* &pSym>				(. wchar_t* name; Symbol* pSym1; .)
-	= Ident<name>						(. pSym = pList->FindSymbol(name); if (pSym == 0) {Err(L"Assignment: undeclared ident"); return;} .)
-	  ":="
-	  Expr<pSym1>						(. if (pSym1 == 0) return; .)
-										(. if (pSym->GetType() != pSym1->GetType()) {Err(L"Assignment: incompatible types"); return;} .)
+	= Ident<name>						(. pSym = pList->FindSymbol(name); if (pSym == 0) Err(L"Assignment: undefined ident"); .)
+	  ":="								(. DACSymbol::OpKind op = DACSymbol::eAssign; .)
+	  Expr<pSym1>						(. pSym = pList->AddSymbol(pDACGen->AddStat(op, pSym, pSym1)); .)
 	.
 
-Condition								(. Symbol* pSym; Symbol* pSym1; .)
-	= Expr<pSym> Relop Expr<pSym1>		(. /* TODO: check type =?= type1 */ .)
+Condition<Symbol* &pSym>				(. DACSymbol::OpKind op; Symbol* pSym1; .)
+	= Expr<pSym> Relop<op> Expr<pSym1>	(. pSym = pList->AddSymbol(pDACGen->AddStat(op, pSym, pSym1)); .)
 	.
 
 Expr<Symbol* &pSym>						(. DACSymbol::OpKind op; Symbol* pSym1; .)
@@ -76,9 +81,7 @@ Expr<Symbol* &pSym>						(. DACSymbol::OpKind op; Symbol* pSym1; .)
 	{ ( "+"								(. op = DACSymbol::eAdd; .)
 	  | "-"								(. op = DACSymbol::eSubtract; .)
 	  )
-	  Term<pSym1>						(. if (pSym == 0) return; .)
-										(. if (pSym->GetType() != pSym1->GetType()) {Err(L"Expr: incompatible types"); return;}
-											pSym = pList->AddSymbol(pDACGen->AddStat(op, pSym, pSym1)); .)
+	  Term<pSym1>						(. pSym = pList->AddSymbol(pDACGen->AddStat(op, pSym, pSym1)); .)
 	}
 	.
 
@@ -87,25 +90,23 @@ Term<Symbol* &pSym>					(. DACSymbol::OpKind op; Symbol* pSym1; .)
 	{ ( "*"								(. op = DACSymbol::eMultiply; .)
 	  | "/"								(. op = DACSymbol::eDivide; .)
 	  )
-	  Fact<pSym1>						(. if (pSym == 0) return; .)
-										(. if (pSym->GetType() != pSym1->GetType()) {Err(L"Term: incompatible types"); return;}
-											pSym = pList->AddSymbol(pDACGen->AddStat(op, pSym, pSym1)); .)
+	  Fact<pSym1>						(. pSym = pList->AddSymbol(pDACGen->AddStat(op, pSym, pSym1)); .)
 	}
 	.
 
 Fact<Symbol* &pSym>						(. wchar_t* name; int val; .)
-	= Ident<name>						(. pSym = pList->FindSymbol(name); if (pSym == 0) {Err(L"Fact: undeclared ident"); return;} .)
+	= Ident<name>						(. pSym = pList->FindSymbol(name); if (pSym == 0) Err(L"Fact: undefined ident"); .)
 	| Number<name, val>					(. pSym = pList->AddSymbol(new ConstSym(mInteger, name, val)); .)
 	| "(" Expr<pSym> ")"
 	.
 
-Relop 
-	= "="
-	| "<="
-	| ">="
-	| "!="
-	| "<"
-	| ">"
+Relop<DACSymbol::OpKind &op>
+	= "="								(. op = DACSymbol::eIsEqual; .)
+	| "<="								(. op = DACSymbol::eIsLessEqual; .)
+	| ">="								(. op = DACSymbol::eIsGreaterEqual; .)
+	| "!="								(. op = DACSymbol::eIsNotEqual; .)
+	| "<"								(. op = DACSymbol::eIsLess; .)
+	| ">"								(. op = DACSymbol::eIsGreater; .)
 	.
 
 Type<BaseType* &type>

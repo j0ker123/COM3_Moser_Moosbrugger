@@ -3,6 +3,8 @@
 
 #include "Scanner.h"
 
+namespace MIEC {
+
 class SymbolType
 {
 public:
@@ -78,5 +80,7 @@ public:
 private:
 	size_t mAddr;
 };
+
+}
 
 #endif // SYMBOL_H_

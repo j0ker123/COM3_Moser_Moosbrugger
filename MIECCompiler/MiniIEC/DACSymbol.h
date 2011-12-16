@@ -3,6 +3,8 @@
 
 #include "Symbol.h"
 
+namespace MIEC {
+
 class DACSymbol : public Symbol
 {
 public:
@@ -28,5 +30,7 @@ public:
 private:
 	size_t mAddr;
 };
+
+} // MIEC
 
 #endif // DACSYMBOL_H_

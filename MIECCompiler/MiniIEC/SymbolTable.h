@@ -3,8 +3,11 @@
 
 #include <map>
 #include <functional>
-#include "Parser.h"
 #include "Symbol.h"
+
+namespace MIEC {
+
+class Parser;
 
 class SymbolTable
 {
@@ -19,45 +22,17 @@ public:
 	typedef std::pair<wchar_t*, Symbol*> tSymbolEntry;
 	typedef std::map<wchar_t*, Symbol*, NameCompare> tSymbolList;
 
-	SymbolTable(MIEC::Parser* pParser)
-		: mpParser(pParser) { }
-	~SymbolTable()
-	{
-		tSymbolList::iterator itor = mSymbolList.begin();
-		for (; itor != mSymbolList.end(); itor++) {
-			delete itor->second;
-		}
-		mSymbolList.clear();
-	}
+	SymbolTable(Parser* pParser);
+	~SymbolTable();
 
-	Symbol* const AddSymbol(Symbol* pSymbol)
-	{
-		if (pSymbol == 0 || pSymbol->GetName() == 0 || pSymbol->GetName() == L"") { return 0; }
-
-		std::pair<tSymbolList::iterator, bool> ret = mSymbolList.insert(tSymbolEntry(pSymbol->GetName(), pSymbol));
-		if (ret.second == false) 
-		{
-			// key name already in list
-			delete pSymbol;
-			pSymbol = ret.first->second;
-		}
-		
-		return ret.first->second;
-	}
-
-	Symbol* const FindSymbol(wchar_t* const name) 
-	{
-		if (name == 0 || name == L"") { return 0; }
-
-		tSymbolList::const_iterator ret = mSymbolList.find(name);
-		if (ret == mSymbolList.end()) { return 0; }
-
-		return ret->second;
-	}
+	Symbol* const AddSymbol(Symbol* pSymbol);
+	Symbol* const FindSymbol(wchar_t* const name);
 
 private:
-	MIEC::Parser* mpParser;
+	Parser* mpParser;
 	tSymbolList mSymbolList;
 };
+
+} // MIEC
 
 #endif // SYMBOLTABLE_H_

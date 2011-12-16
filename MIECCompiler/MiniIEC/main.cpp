@@ -4,8 +4,6 @@
 #include "Scanner.h"
 #include "Parser.h"
 
-
-using namespace MIEC;
 using namespace std;
 
 int main(int argc, char* argv[])
@@ -27,11 +25,11 @@ int main(int argc, char* argv[])
 		}
 		else
 		{
-			Scanner* pScanner = new Scanner( pFile );
-			Parser* pParser = new Parser( pScanner );
+			MIEC::Scanner* pScanner = new MIEC::Scanner( pFile );
+			MIEC::Parser* pParser = new MIEC::Parser( pScanner );
 
-			pParser->pList = new SymbolTable(pParser);
-			pParser->pDACGen = new DACGenerator(pParser);
+			pParser->pList = new MIEC::SymbolTable( pParser );
+			pParser->pDACGen = new MIEC::DACGenerator( pParser );
 			pParser->Parse();
 
 			cout << "count errors: " << pParser->errors->count << endl;
