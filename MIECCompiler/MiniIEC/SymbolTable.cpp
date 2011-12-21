@@ -31,7 +31,7 @@ Symbol* const SymbolTable::AddSymbol(Symbol* pSymbol)
 	std::pair<tSymbolList::iterator, bool> ret = mSymbolList.insert(tSymbolEntry(pName, pSymbol));
 	if (ret.second == false) 
 	{
-		mpParser->Err(L"AddSymbol: symbol already defined");
+		//mpParser->Err(L"AddSymbol: symbol already defined");
 
 		delete pSymbol;
 		pSymbol = ret.first->second;
@@ -49,7 +49,7 @@ Symbol* const SymbolTable::FindSymbol(wchar_t* const pName)
 
 	tSymbolList::const_iterator ret = mSymbolList.find(pName);
 	if (ret == mSymbolList.end()) { 
-		mpParser->Err(L"FindSymbol: undefined symbol");
+		//mpParser->Err(L"FindSymbol: undefined symbol");
 		return 0; 
 	}
 
