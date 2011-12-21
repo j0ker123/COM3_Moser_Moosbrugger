@@ -5,6 +5,16 @@
 
 namespace MIEC {
 
+class DACLabelSymbol : public Symbol
+{
+public:
+	DACLabelSymbol(SymbolType* pType, wchar_t* name, size_t addr)
+		: Symbol(pType, name), mAddr(addr) { }
+	int GetAddr() { return mAddr; }
+private:
+	size_t mAddr;
+};
+
 class DACSymbol : public Symbol
 {
 public:
@@ -14,22 +24,13 @@ public:
 		eJump, eIfJump, eIfFalseJump, 
 		eAssign, ePrint, eExit };
 
-	DACSymbol(SymbolType* pType, wchar_t* name, OpKind operation, Symbol* pArg1, Symbol* pArg2)
-		: Symbol(pType, name), mOperation(operation), mpArg1(pArg1), mpArg2(pArg2) {}
+	DACSymbol(SymbolType* pType, wchar_t* name, OpKind operation, Symbol* pArg1, Symbol* pArg2, DACLabelSymbol* pLabel)
+		: Symbol(pType, name), mOperation(operation), mpArg1(pArg1), mpArg2(pArg2), mpLabel(pLabel) {}
 private:
+	DACLabelSymbol* mpLabel;
 	OpKind mOperation;
 	Symbol* mpArg1;
 	Symbol* mpArg2;
-};
-
-class DACLabelSymbol : public Symbol
-{
-public:
-	DACLabelSymbol(SymbolType* pType, wchar_t* name, size_t addr)
-		: Symbol(pType, name), mAddr(addr) { }
-	int GetAddr() { return mAddr; }
-private:
-	size_t mAddr;
 };
 
 } // MIEC

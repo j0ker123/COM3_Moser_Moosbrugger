@@ -37,7 +37,7 @@ MIEC
 		[ VarDecl ]
 	  "BEGIN"
 		Statements
-	  "END"
+	  "END"								(. pList->AddSymbol(pDACGen->AddStat(DACSymbol::eExit, 0, 0)); .)
 	.
 
 VarDecl									(. mInteger = new BaseType(BaseType::eInt); .)
@@ -70,19 +70,19 @@ Branch<Symbol* &pSym>					(. DACLabelSymbol* pLblElse = pDACGen->GetNewLabel(); 
 	= "IF"								
 	  Condition<pSym>
 	  "THEN"							(. pList->AddSymbol(pDACGen->AddStat(DACSymbol::eIfFalseJump, pSym, pLblElse)); .)
-	  Statements						(. pList->AddSymbol(pDACGen->AddStat(DACSymbol::eJump, pLblNext, 0)); .)
-	  [ "ELSE"							(. /* TODO: use pLblElse */ .)
-	    Statements
+	  Statements						
+	  [ "ELSE"							(. pList->AddSymbol(pDACGen->AddStat(DACSymbol::eJump, pLblNext, 0)); pList->AddSymbol(pDACGen->AddLabel(pLblElse)); .)	                                       
+	    Statements						(. pList->AddSymbol(pDACGen->AddLabel(pLblNext)); .)
 	  ] 
-	  "END"								(. /* TODO: use pLblNext */ .)
+	  "END"								(. pList->AddSymbol(pDACGen->AddLabel(pLblElse)); .)
 	.
 
 Loop<Symbol* &pSym>						(. DACLabelSymbol* pLblCond = pDACGen->GetNewLabel(); DACLabelSymbol* pLblNext = pDACGen->GetNewLabel(); .)
-	= "WHILE"							(. /* TODO: use pLblCond */ .)
+	= "WHILE"							(. pList->AddSymbol(pDACGen->AddLabel(pLblCond)); .)
 	  Condition<pSym>
 	  "DO"								(. pList->AddSymbol(pDACGen->AddStat(DACSymbol::eIfFalseJump, pSym, pLblNext)); .)
 	  Statements						(. pList->AddSymbol(pDACGen->AddStat(DACSymbol::eJump, pLblCond, 0)); .)
-	  "END"								(. /* TODO: use pLblNext */ .)
+	  "END"								(. pList->AddSymbol(pDACGen->AddLabel(pLblNext)); .)
 	.
 
 Print<Symbol* &pSym>
