@@ -8,10 +8,11 @@ namespace MIEC {
 class DACSymbol : public Symbol
 {
 public:
-	enum OpKind { 
+	enum OpKind { eUnknown, 
 		eAdd, eSubtract, eMultiply, eDivide,
 		eIsEqual, eIsNotEqual, eIsLessEqual, eIsGreaterEqual, eIsLess, eIsGreater,
-		eAssign, eJump, eIfJump, eIfFalseJump, ePrint, eExit };
+		eJump, eIfJump, eIfFalseJump, 
+		eAssign, ePrint, eExit };
 
 	DACSymbol(SymbolType* pType, wchar_t* name, OpKind operation, Symbol* pArg1, Symbol* pArg2)
 		: Symbol(pType, name), mOperation(operation), mpArg1(pArg1), mpArg2(pArg2) {}

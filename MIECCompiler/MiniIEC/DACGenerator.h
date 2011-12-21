@@ -16,11 +16,15 @@ public:
 	DACGenerator(Parser* const pParser);
 	~DACGenerator();
 
+	DACLabelSymbol* const GetNewLabel();
+
 	DACSymbol* const AddStat(DACSymbol::OpKind op, Symbol* pArg1, Symbol* pArg2);
 
 private:
 	Parser* mpParser;
 	tDACList mDACList;
+
+	size_t mLabelNumber;
 };
 
 } // MIEC

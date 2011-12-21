@@ -1,4 +1,4 @@
-(* example without errors *)
+(* example with branch errors *)
 
 PROGRAM Example3
 	BEGIN_VAR
@@ -6,6 +6,8 @@ PROGRAM Example3
 		b: Integer;
 	END_VAR
 BEGIN
-	b := 2
-	;
+	IF THEN END
+	IF a = b THEN END
+
+	IF a = b THEN a := b; END
 END

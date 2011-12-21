@@ -14,8 +14,8 @@ class SymbolTable
 public:
 	class NameCompare : public std::binary_function<wchar_t*, wchar_t*, bool> {
 	public:
-		bool operator()(wchar_t* name1, wchar_t* name2) const {
-			return (coco_string_compareto(name1, name2) < 0); 
+		bool operator()(wchar_t* pName1, wchar_t* pName2) const {
+			return (coco_string_compareto(pName1, pName2) < 0); 
 		}
 	};
 
@@ -26,7 +26,7 @@ public:
 	~SymbolTable();
 
 	Symbol* const AddSymbol(Symbol* pSymbol);
-	Symbol* const FindSymbol(wchar_t* const name);
+	Symbol* const FindSymbol(wchar_t* const pName);
 
 private:
 	Parser* mpParser;

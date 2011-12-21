@@ -1,4 +1,4 @@
-(* example with errors *)
+(* example with statement errors *)
 
 PROGRAM Example2
 	BEGIN_VAR
@@ -8,6 +8,7 @@ PROGRAM Example2
 BEGIN
 	b := a;
 	a := anton;
+	(* 3 := a; *)
 
 	print(2 * 3 + 4);
 	print(peter)

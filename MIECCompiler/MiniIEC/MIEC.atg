@@ -43,7 +43,7 @@ MIEC
 VarDecl									(. mInteger = new BaseType(BaseType::eInt); .)
 	= "BEGIN_VAR"						(. wchar_t* name; BaseType* type; size_t addr = 0; .)
 	  Ident<name> ":" Type<type> ";"	(. pList->AddSymbol(new VarSym(type, name, addr)); addr += type->GetSize(); .)
-	{ Ident<name> ":" Type<type> ";"	(. if (pList->FindSymbol(name) == 0) {pList->AddSymbol(new VarSym(type, name, addr)); addr += type->GetSize();} else Err(L"VarDecl: ident already defined"); .)
+	{ Ident<name> ":" Type<type> ";"	(. /*if (pList->FindSymbol(name) == 0) {*/pList->AddSymbol(new VarSym(type, name, addr)); addr += type->GetSize();/*} else Err(L"VarDecl: ident already defined");*/ .)
 	}
 	  "END_VAR"
 	.
@@ -60,35 +60,40 @@ Stat									(. Symbol* pSym = 0; .)
 	| Print<pSym>
 	.
 
-Assignment<Symbol* &pSym>				(. wchar_t* name; Symbol* pSym1; .)
+Assignment<Symbol* &pSym>				(. wchar_t* name; Symbol* pSym1 = 0; .)
 	= Ident<name>						(. pSym = pList->FindSymbol(name); /*if (pSym == 0) Err(L"Assignment: undefined ident");*/ .)
 	  ":=" 
 	  Expr<pSym1> ";"					(. pSym = pList->AddSymbol(pDACGen->AddStat(DACSymbol::eAssign, pSym, pSym1)); .)
 	.
 
-Branch<Symbol* &pSym>
-	= "IF" Condition<pSym>				(. if (pSym == 0 /* TODO: || pSym->GetType() != boolean */) Err(L"Stat: invalid condition"); .)
-	  "THEN" Statements 
-	  [ "ELSE" Statements
+Branch<Symbol* &pSym>					(. DACLabelSymbol* pLblElse = pDACGen->GetNewLabel(); DACLabelSymbol* pLblNext = pDACGen->GetNewLabel(); .)
+	= "IF"								
+	  Condition<pSym>					(. /*if (pSym == 0 /* TODO: || pSym->GetType() != boolean */) Err(L"Branch: invalid condition");*/ .)
+	  "THEN"							(. pList->AddSymbol(pDACGen->AddStat(DACSymbol::eIfFalseJump, pSym, pLblElse)); .)
+	  Statements						(. pList->AddSymbol(pDACGen->AddStat(DACSymbol::eJump, pLblNext, 0)); .)
+	  [ "ELSE"							(. /* TODO: use pLblElse */ .)
+	    Statements
 	  ] 
-	  "END"
+	  "END"								(. /* TODO: use pLblNext */ .)
 	.
 
-Loop<Symbol* &pSym>
-	= "WHILE" Condition<pSym>			(. if (pSym == 0 /* TODO: || pSym->GetType() != boolean */) Err(L"Stat: invalid condition"); .)
-	  "DO" Statements
-	  "END"
+Loop<Symbol* &pSym>						(. DACLabelSymbol* pLblCond = pDACGen->GetNewLabel(); DACLabelSymbol* pLblNext = pDACGen->GetNewLabel(); .)
+	= "WHILE"							(. /* TODO: use pLblCond */ .)
+	  Condition<pSym>					(. if (pSym == 0 /* TODO: || pSym->GetType() != boolean */) Err(L"Loop: invalid condition"); .)
+	  "DO"								(. pList->AddSymbol(pDACGen->AddStat(DACSymbol::eIfFalseJump, pSym, pLblNext)); .)
+	  Statements						(. pList->AddSymbol(pDACGen->AddStat(DACSymbol::eJump, pLblCond, 0)); .)
+	  "END"								(. /* TODO: use pLblNext */ .)
 	.
 
 Print<Symbol* &pSym>
 	= "print" "(" Expr<pSym> ")" ";"	(. pSym = pList->AddSymbol(pDACGen->AddStat(DACSymbol::ePrint, pSym, 0)); .)
 	.
 
-Condition<Symbol* &pSym>				(. DACSymbol::OpKind op; Symbol* pSym1; .)
+Condition<Symbol* &pSym>				(. DACSymbol::OpKind op = DACSymbol::eUnknown; Symbol* pSym1 = 0; .)
 	= Expr<pSym> Relop<op> Expr<pSym1>	(. pSym = pList->AddSymbol(pDACGen->AddStat(op, pSym, pSym1)); .)
 	.
 
-Expr<Symbol* &pSym>						(. DACSymbol::OpKind op; Symbol* pSym1; .)
+Expr<Symbol* &pSym>						(. DACSymbol::OpKind op = DACSymbol::eUnknown; Symbol* pSym1 = 0; .)
 	= Term<pSym>						(. /*if (pSym == 0) Err(L"Expr: invalid term");*/ .)
 	{ ( "+"								(. op = DACSymbol::eAdd; .)
 	  | "-"								(. op = DACSymbol::eSubtract; .)
@@ -97,7 +102,7 @@ Expr<Symbol* &pSym>						(. DACSymbol::OpKind op; Symbol* pSym1; .)
 	}
 	.
 
-Term<Symbol* &pSym>						(. DACSymbol::OpKind op; Symbol* pSym1; .)
+Term<Symbol* &pSym>						(. DACSymbol::OpKind op = DACSymbol::eUnknown; Symbol* pSym1 = 0; .)
 	= Fact<pSym>						(. /*if (pSym == 0) Err(L"Term: invalid fact");*/ .)
 	{ ( "*"								(. op = DACSymbol::eMultiply; .)
 	  | "/"								(. op = DACSymbol::eDivide; .)
