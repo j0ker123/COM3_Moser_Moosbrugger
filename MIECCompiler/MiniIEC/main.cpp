@@ -37,7 +37,8 @@ int main(int argc, wchar_t* argv[])
 			pParser->Parse();
 			cout << "Parse errors: " << pParser->errors->count << endl;
 
-			MIEC::CodeGenerator codeGen(pParser->pDACGen->GetDACList());
+			size_t const cNrRegisters = 8;
+			MIEC::CodeGenerator codeGen(pParser->pDACGen->GetDACList(), cNrRegisters);
 			codeGen.GenerateCode(fileName);
 
 			delete pParser->pList; pParser->pList = 0;

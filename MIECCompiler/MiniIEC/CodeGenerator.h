@@ -9,10 +9,10 @@ namespace MIEC {
 
 class CodeGenerator {
 public:
-	CodeGenerator(tDACList const*const apDacList, size_t const nrRegisters);
+	CodeGenerator(const tDACList* const apDacList, const size_t nrRegisters);
 	~CodeGenerator();
 
-	void GenerateCode(std::wstring const& arFileName);
+	void GenerateCode(const std::wstring& arFileName);
 
 private:
 	typedef tDACList::size_type DACPosition;
@@ -22,8 +22,8 @@ private:
 	void OperationMultiply(DACSymbol* apDacSym);
 	void OperationDivide(DACSymbol* apDacSym);
 	void OperationAssign(DACSymbol* apDacSym, DACPosition aDacPos);
-	void OperationJump(DACSymbol* apDacSym, std::map<WORD, DACLabel*>& arUnresolvedJumps);
-	void OperationConditionalJump(DACSymbol* apDacSym, std::map<WORD, DACLabel*>& arUnresolvedJumps, DACPosition aDacPos);
+	void OperationJump(DACSymbol* apDacSym /*, std::map<WORD, DACLabel*>& arUnresolvedJumps*/);
+	void OperationConditionalJump(DACSymbol* apDacSym /*, std::map<WORD, DACLabel*>& arUnresolvedJumps*/, DACPosition aDacPos);
 	void OperationPrint(DACSymbol* apDacSym, DACPosition aDacPos);
 
 	//private members

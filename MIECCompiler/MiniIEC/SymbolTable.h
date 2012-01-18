@@ -22,14 +22,14 @@ public:
 	typedef std::pair<wchar_t*, Symbol*> tSymbolEntry;
 	typedef std::map<wchar_t*, Symbol*, NameCompare> tSymbolList;
 
-	SymbolTable(Parser* pParser);
+	SymbolTable(Parser* const pParser);
 	~SymbolTable();
 
 	Symbol* const AddSymbol(Symbol* pSymbol);
 	Symbol* const FindSymbol(wchar_t* const pName);
 
 private:
-	Parser* mpParser;
+	Parser* const mpParser;
 	tSymbolList mSymbolList;
 };
 

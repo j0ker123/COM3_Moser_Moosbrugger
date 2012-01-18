@@ -3,8 +3,8 @@
 
 namespace MIEC {
 
-CodeGenerator::CodeGenerator(tDACList const*const apDacList, size_t const nrRegisters)
-	: mpDacList(apDacList), mpGenProl16(new CodeGenProl16()), mpRegAdmin(new RegisterAdmin(nrRegisters))
+CodeGenerator::CodeGenerator(const tDACList* const apDacList, const size_t nrRegisters)
+	: mpDacList(apDacList), mpGenProl16(new CodeGenProl16()), mpRegAdmin(new RegisterAdmin(mpGenProl16, nrRegisters))
 {
 }
 
@@ -13,7 +13,7 @@ CodeGenerator::~CodeGenerator()
 	delete mpGenProl16;
 }
 
-void CodeGenerator::GenerateCode(std::wstring const& arFileName)
+void CodeGenerator::GenerateCode(const std::wstring& arFileName)
 {
 	assert(mpDacList != 0);
 	assert(mpGenProl16 != 0);
@@ -36,13 +36,14 @@ void CodeGenerator::GenerateCode(std::wstring const& arFileName)
 		case DACSymbol::eAssign :
 			OperationAssign(sym, mpGenProl16->GetCodePosition()); break;
 		case DACSymbol::eJump :
-			OperationJump(sym, ...); break;
+			OperationJump(sym); break;
 		case DACSymbol::eIfJump :
-			OperationConditionalJump(sym, ...); break;
+			OperationConditionalJump(sym, mpGenProl16->GetCodePosition()); break;
 		case DACSymbol::ePrint :
 			OperationPrint(sym, mpGenProl16->GetCodePosition()); break;
 		default:
-			...
+			// TODO: ...
+			break;
 		}
 	}
 
@@ -214,6 +215,36 @@ void CodeGenerator::OperationAssign(DACSymbol* apDacSym, DACPosition aDacPos)
 	mpGenProl16->Move(regA, regB);
 
 	mpRegAdmin->AssignRegister(regA, apDacSym);	// ???
+}
+
+////////////////////////////////////////////////////////////////////////////
+// Jump
+//
+// 
+//
+////////////////////////////////////////////////////////////////////////////
+void CodeGenerator::OperationJump(DACSymbol* apDacSym /*, std::map<WORD, DACLabel*>& arUnresolvedJumps*/)
+{
+}
+
+////////////////////////////////////////////////////////////////////////////
+// Conditional Jump
+//
+// 
+//
+////////////////////////////////////////////////////////////////////////////
+void CodeGenerator::OperationConditionalJump(DACSymbol* apDacSym /*, std::map<WORD, DACLabel*>& arUnresolvedJumps*/, DACPosition aDacPos)
+{
+}
+
+////////////////////////////////////////////////////////////////////////////
+// Print
+//
+// 
+//
+////////////////////////////////////////////////////////////////////////////
+void CodeGenerator::OperationPrint(DACSymbol* apDacSym, DACPosition aDacPos) 
+{
 }
 
 } // namespace MIEC

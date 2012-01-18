@@ -5,6 +5,7 @@
 #include <map>
 #include "GlobalDef.h"
 #include "Symbol.h"
+#include "CodeGenProl16.h"
 
 namespace MIEC {
 
@@ -12,17 +13,20 @@ typedef BYTE tRegNr;
 
 class RegisterAdmin {
 public:
-	RegisterAdmin(size_t const nrRegs);
+	RegisterAdmin(CodeGenProl16* const pProl16Gen, const size_t nrRegs);
 	~RegisterAdmin();
 
-	tRegNr const GetRegister();
-	tRegNr const GetRegister(Symbol const*const pSym);
-	void AssignRegister(tRegNr const regNr, Symbol const*const pSym);
-	void FreeRegister(tRegNr const regNr);
+	const tRegNr GetRegister();
+	const tRegNr GetRegister(const Symbol* const pSym);
+	void AssignRegister(const tRegNr regNr, const Symbol* const pSym);
+	void FreeRegister(const tRegNr regNr);
 
 private:
-	typedef std::pair<tRegNr, Symbol const*> tRegEntry;
-	typedef std::map<tRegNr, Symbol const*> tRegList;
+	CodeGenProl16* const mpProl16Gen;
+	const size_t mNrRegisters;
+
+	typedef std::pair<tRegNr, const Symbol*> tRegEntry;
+	typedef std::map<tRegNr, const Symbol*> tRegList;
 	tRegList mRegList;
 };
 

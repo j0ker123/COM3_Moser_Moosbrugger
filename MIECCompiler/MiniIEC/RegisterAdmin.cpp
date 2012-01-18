@@ -4,7 +4,8 @@
 
 namespace MIEC {
 
-RegisterAdmin::RegisterAdmin(size_t const nrRegs)
+RegisterAdmin::RegisterAdmin(CodeGenProl16* const pProl16Gen, const size_t nrRegs)
+	: mpProl16Gen(pProl16Gen), mNrRegisters(nrRegs)
 {
 }
 
@@ -16,11 +17,12 @@ tRegNr const RegisterAdmin::GetRegister()
 {
 	// allocate new unused register
 	tRegNr regNr = mRegList.size();
-	mRegList.insert(tRegEntry(regNr, 0));
+	const Symbol* const pSym = 0;
+	mRegList.insert(tRegEntry(regNr, pSym));
 	return regNr;
 }
 
-tRegNr const RegisterAdmin::GetRegister(Symbol const*const pSym)
+tRegNr const RegisterAdmin::GetRegister(const Symbol* const pSym)
 {
 	assert(pSym != 0);
 	if (pSym == 0) { return GetRegister(); }
@@ -31,10 +33,12 @@ tRegNr const RegisterAdmin::GetRegister(Symbol const*const pSym)
 		if (itor->second == pSym) { return itor->first; }
 	}
 	// if not found allocate new (unused) register
-	return GetRegister();
+	tRegNr regNr = GetRegister();
+	mpProl16Gen->LoadI(regNr, ((ConstSym*)pSym)->GetVal());
+	return regNr;
 }
 
-void RegisterAdmin::AssignRegister(tRegNr const regNr, Symbol const*const pSym)
+void RegisterAdmin::AssignRegister(const tRegNr regNr, const Symbol* const pSym)
 {
 	assert(pSym != 0);
 
@@ -43,7 +47,7 @@ void RegisterAdmin::AssignRegister(tRegNr const regNr, Symbol const*const pSym)
 	ret->second = pSym;
 }
 
-void RegisterAdmin::FreeRegister(tRegNr const regNr)
+void RegisterAdmin::FreeRegister(const tRegNr regNr)
 {
 	// free (set unused) regNr
 	mRegList.erase(regNr);

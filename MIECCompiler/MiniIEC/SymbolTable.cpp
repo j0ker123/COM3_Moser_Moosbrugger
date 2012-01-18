@@ -4,7 +4,7 @@
 
 namespace MIEC {
 
-SymbolTable::SymbolTable(Parser* pParser)
+SymbolTable::SymbolTable(Parser* const pParser)
 	: mpParser(pParser) { }
 
 SymbolTable::~SymbolTable()
