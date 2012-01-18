@@ -43,4 +43,10 @@ void RegisterAdmin::AssignRegister(tRegNr const regNr, Symbol const*const pSym)
 	ret->second = pSym;
 }
 
+void RegisterAdmin::FreeRegister(tRegNr const regNr)
+{
+	// free (set unused) regNr
+	mRegList.erase(regNr);
+}
+
 } // namespace MIEC

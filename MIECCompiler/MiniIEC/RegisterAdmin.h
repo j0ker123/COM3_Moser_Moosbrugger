@@ -18,6 +18,7 @@ public:
 	tRegNr const GetRegister();
 	tRegNr const GetRegister(Symbol const*const pSym);
 	void AssignRegister(tRegNr const regNr, Symbol const*const pSym);
+	void FreeRegister(tRegNr const regNr);
 
 private:
 	typedef std::pair<tRegNr, Symbol const*> tRegEntry;

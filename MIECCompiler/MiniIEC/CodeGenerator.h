@@ -3,12 +3,13 @@
 
 #include "DACGenerator.h"
 #include "CodeGenProl16.h"
+#include "RegisterAdmin.h"
 
 namespace MIEC {
 
 class CodeGenerator {
 public:
-	CodeGenerator(tDACList const* apDacList);
+	CodeGenerator(tDACList const*const apDacList, size_t const nrRegisters);
 	~CodeGenerator();
 
 	void GenerateCode(std::wstring const& arFileName);
@@ -26,9 +27,9 @@ private:
 	void OperationPrint(DACSymbol* apDacSym, DACPosition aDacPos);
 
 	//private members
-	const tDACList* mpDacList;
-	CodeGenProl16* mpGenProl16;
-	RegisterAdmin* mpRegAdmin;
+	const tDACList* const mpDacList;
+	CodeGenProl16* const mpGenProl16;
+	RegisterAdmin* const mpRegAdmin;
 };
 
 } // namespace MIEC

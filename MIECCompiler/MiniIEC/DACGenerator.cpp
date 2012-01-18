@@ -1,21 +1,23 @@
 
+#include <assert.h>
 #include "Parser.h"
 #include "DACGenerator.h"
 
 namespace MIEC {
 
 DACGenerator::DACGenerator(Parser* const pParser)
-	: mpParser(pParser), mpCurrLabel(0), mLabelNumber(0) 
+	: mpParser(pParser), mpDACList(new tDACList), mpCurrLabel(0), mLabelNumber(0) 
 {
 }
 
 DACGenerator::~DACGenerator()
 {
 	// don't delete twice! - already done in SymbolTable destructor
-	//tDACList::iterator itor = mDACList.begin();
-	//for (; itor != mDACList.end(); itor++) {
+	//tDACList::iterator itor = mpDACList->begin();
+	//for (; itor != mDACList->end(); itor++) {
 	//	delete *itor;
 	//}
+	delete mpDACList;
 }
 
 wchar_t* CreateString(wchar_t* prefix, size_t number)
@@ -49,6 +51,9 @@ DACLabelSymbol* const DACGenerator::AddLabel(DACLabelSymbol* pLabel)
 
 DACSymbol* const DACGenerator::AddStat(DACSymbol::OpKind op, Symbol* pArg1, Symbol* pArg2)
 {
+	assert(mpParser != 0);
+	assert(mpDACList != 0);
+
 	size_t err = 0;	// error counter
 
 	SymbolType* pType = 0; //UnknownType;
@@ -109,13 +114,18 @@ DACSymbol* const DACGenerator::AddStat(DACSymbol::OpKind op, Symbol* pArg1, Symb
 		if (err > 0) { return 0; }
 	}
 
-	wchar_t* pName = CreateString(L"$t", mDACList.size());
+	wchar_t* pName = CreateString(L"$t", mpDACList->size());
 
 	DACSymbol* stat = new DACSymbol(pType, pName, op, pArg1, pArg2, mpCurrLabel);
-	mDACList.push_back(stat);
+	mpDACList->push_back(stat);
 
 	mpCurrLabel = 0;
 	return stat;
+}
+
+tDACList const*const DACGenerator::GetDACList() const
+{
+	return mpDACList;
 }
 
 } // MIEC

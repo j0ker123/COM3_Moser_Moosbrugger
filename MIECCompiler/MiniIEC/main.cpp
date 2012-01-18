@@ -1,12 +1,15 @@
+
 #include <stdio.h>
+#include <string>
 #include <iostream>
 
 #include "Scanner.h"
 #include "Parser.h"
+#include "CodeGenerator.h"
 
 using namespace std;
 
-int main(int argc, char* argv[])
+int main(int argc, wchar_t* argv[])
 {	
 	if (argc < 2) {
 		cout << "Usage: <program>.exe <path-to-miec>.miec {<path-to-miec>.miec}" << endl;
@@ -16,9 +19,10 @@ int main(int argc, char* argv[])
 	FILE* pFile = 0;
 	for( int i = 1; i < argc; i++ )
 	{
-		cout << "parse file: " << argv[i] << endl;
+		wstring fileName = argv[i];
+		cout << "parse file: " << fileName.c_str() << endl;
 
-		pFile = fopen(argv[i], "r");
+		pFile = _wfopen(fileName.c_str(), L"r");
 		if (pFile == 0) 
 		{
 			cout << "Error opening file!" << endl;
@@ -31,8 +35,10 @@ int main(int argc, char* argv[])
 			pParser->pList = new MIEC::SymbolTable( pParser );
 			pParser->pDACGen = new MIEC::DACGenerator( pParser );
 			pParser->Parse();
+			cout << "Parse errors: " << pParser->errors->count << endl;
 
-			cout << "count errors: " << pParser->errors->count << endl;
+			MIEC::CodeGenerator codeGen(pParser->pDACGen->GetDACList());
+			codeGen.GenerateCode(fileName);
 
 			delete pParser->pList; pParser->pList = 0;
 			delete pParser->pDACGen; pParser->pDACGen = 0;

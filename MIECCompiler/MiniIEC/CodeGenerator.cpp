@@ -3,15 +3,14 @@
 
 namespace MIEC {
 
-CodeGenerator::CodeGenerator(tDACList const * apDacList)
-	: mpDacList(apDacList)
+CodeGenerator::CodeGenerator(tDACList const*const apDacList, size_t const nrRegisters)
+	: mpDacList(apDacList), mpGenProl16(new CodeGenProl16()), mpRegAdmin(new RegisterAdmin(nrRegisters))
 {
-	mpGenProl16 = new CodeGenProl16();
 }
 
 CodeGenerator::~CodeGenerator()
 {
-	delete mpGenProl16; mpGenProl16 = 0;
+	delete mpGenProl16;
 }
 
 void CodeGenerator::GenerateCode(std::wstring const& arFileName)
@@ -19,8 +18,8 @@ void CodeGenerator::GenerateCode(std::wstring const& arFileName)
 	assert(mpDacList != 0);
 	assert(mpGenProl16 != 0);
 
-	tDACList::const_iterator itor = mpDacList.begin();
-	for (; itor != mpDacList.end(); itor++) 
+	tDACList::const_iterator itor = mpDacList->begin();
+	for (; itor != mpDacList->end(); itor++) 
 	{
 		DACSymbol* sym = *itor;
 		DACSymbol::OpKind op = sym->GetOperation();
@@ -60,9 +59,9 @@ void CodeGenerator::GenerateCode(std::wstring const& arFileName)
 ////////////////////////////////////////////////////////////////////////////
 void CodeGenerator::OperationAdd(DACSymbol* apDacSym, DACPosition aDacPos)
 {
-	RegNr regA = mpRegAdmin->GetRegister(apDacSym->GetArgument1());	// addend1
-	RegNr regB = mpRegAdmin->GetRegister(apDacSym->GetArgument2()); // addend2
-	RegNr regResult = mpRegAdmin->GetRegister(); // result
+	tRegNr regA = mpRegAdmin->GetRegister(apDacSym->GetArgument1());	// addend1
+	tRegNr regB = mpRegAdmin->GetRegister(apDacSym->GetArgument2()); // addend2
+	tRegNr regResult = mpRegAdmin->GetRegister(); // result
 
 	mpGenProl16->Move(regResult, regA);
 	mpGenProl16->Add(regResult, regB);
@@ -79,9 +78,9 @@ void CodeGenerator::OperationAdd(DACSymbol* apDacSym, DACPosition aDacPos)
 ////////////////////////////////////////////////////////////////////////////
 void CodeGenerator::OperationSubtract(DACSymbol* apDacSym, DACPosition aDacPos)
 {
-	RegNr regA = mpRegAdmin->GetRegister(apDacSym->GetArgument1());	// minuend
-	RegNr regB = mpRegAdmin->GetRegister(apDacSym->GetArgument2()); // subtrahend
-	RegNr regResult = mpRegAdmin->GetRegister(); // result
+	tRegNr regA = mpRegAdmin->GetRegister(apDacSym->GetArgument1());	// minuend
+	tRegNr regB = mpRegAdmin->GetRegister(apDacSym->GetArgument2()); // subtrahend
+	tRegNr regResult = mpRegAdmin->GetRegister(); // result
 
 	mpGenProl16->Move(regResult, regA);
 	mpGenProl16->Sub(regResult, regB);
@@ -106,13 +105,13 @@ void CodeGenerator::OperationSubtract(DACSymbol* apDacSym, DACPosition aDacPos)
 ////////////////////////////////////////////////////////////////////////////
 void CodeGenerator::OperationMultiply(DACSymbol* apDacSym)
 {
-	RegNr regA = mpRegAdmin->GetRegister(apDacSym->GetArgument1()); // multiplikand
-	RegNr regB = mpRegAdmin->GetRegister(apDacSym->GetArgument2()); // multiplier
-	RegNr regJmp = mpRegAdmin->GetRegister(); // used for jumps
-	RegNr regResult = mpRegAdmin->GetRegister(); // will contain result
+	tRegNr regA = mpRegAdmin->GetRegister(apDacSym->GetArgument1()); // multiplikand
+	tRegNr regB = mpRegAdmin->GetRegister(apDacSym->GetArgument2()); // multiplier
+	tRegNr regJmp = mpRegAdmin->GetRegister(); // used for jumps
+	tRegNr regResult = mpRegAdmin->GetRegister(); // will contain result
 	mpGenProl16->LoadI(regResult, 0); //init
 	WORD codePosStart = mpGenProl16->GetCodePosition();
-	RegNr helpReg = mpRegAdmin->GetRegister();
+	tRegNr helpReg = mpRegAdmin->GetRegister();
 	mpGenProl16->LoadI(helpReg, 0);
 	mpGenProl16->Comp(regB, helpReg); //compare: multiplier != 0
 	WORD jumpData1 = mpGenProl16->LoadI(regJmp, 0);
@@ -160,12 +159,12 @@ void CodeGenerator::OperationMultiply(DACSymbol* apDacSym)
 ////////////////////////////////////////////////////////////////////////////
 void CodeGenerator::OperationDivide(DACSymbol* apDacSym)
 {
-	RegNr regA = mpRegAdmin->GetRegister(apDacSym->GetArgument1()); // dividend
-	RegNr regB = mpRegAdmin->GetRegister(apDacSym->GetArgument2()); // divisor
-	RegNr regJmp = mpRegAdmin->GetRegister(); // used for jumps
-	RegNr regRemainder = mpRegAdmin->GetRegister(); // remainder
+	tRegNr regA = mpRegAdmin->GetRegister(apDacSym->GetArgument1()); // dividend
+	tRegNr regB = mpRegAdmin->GetRegister(apDacSym->GetArgument2()); // divisor
+	tRegNr regJmp = mpRegAdmin->GetRegister(); // used for jumps
+	tRegNr regRemainder = mpRegAdmin->GetRegister(); // remainder
 	mpGenProl16->LoadI(regRemainder, 0);
-	RegNr regBits = mpRegAdmin->GetRegister(); // bit counter
+	tRegNr regBits = mpRegAdmin->GetRegister(); // bit counter
 	mpGenProl16->LoadI(regBits, 16);
 	WORD codePosStart = mpGenProl16->GetCodePosition();
 	mpGenProl16->ShL(regA);
@@ -179,7 +178,7 @@ void CodeGenerator::OperationDivide(DACSymbol* apDacSym)
 	mpGenProl16->Jump(regJmp);
 	mpGenProl16->SetAddress(jumpData1, mpGenProl16->GetCodePosition());
 	mpGenProl16->Sub(regRemainder, regB);
-	RegNr helpReg = mpRegAdmin->GetRegister();
+	tRegNr helpReg = mpRegAdmin->GetRegister();
 	mpGenProl16->LoadI(helpReg, 1);
 	mpGenProl16->Or(regA, helpReg);
 	mpGenProl16->SetAddress(jumpData2, mpGenProl16->GetCodePosition());
@@ -209,8 +208,8 @@ void CodeGenerator::OperationDivide(DACSymbol* apDacSym)
 ////////////////////////////////////////////////////////////////////////////
 void CodeGenerator::OperationAssign(DACSymbol* apDacSym, DACPosition aDacPos)
 {
-	RegNr regA = mpRegAdmin->GetRegister(apDacSym->GetArgument1());	// destination
-	RegNr regB = mpRegAdmin->GetRegister(apDacSym->GetArgument2());	// source
+	tRegNr regA = mpRegAdmin->GetRegister(apDacSym->GetArgument1());	// destination
+	tRegNr regB = mpRegAdmin->GetRegister(apDacSym->GetArgument2());	// source
 
 	mpGenProl16->Move(regA, regB);
 
