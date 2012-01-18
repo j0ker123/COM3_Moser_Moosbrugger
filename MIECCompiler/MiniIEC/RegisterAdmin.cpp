@@ -25,13 +25,16 @@ tRegNr const RegisterAdmin::GetRegister()
 tRegNr const RegisterAdmin::GetRegister(const Symbol* const pSym)
 {
 	assert(pSym != 0);
-	if (pSym == 0) { return GetRegister(); }
+	
+	if (pSym != 0 && mRegList.size() > 0) {
 
-	// search register assigned to pSym
-	tRegList::const_iterator itor = mRegList.begin();
-	for (; itor != mRegList.end(); itor++) {
-		if (itor->second == pSym) { return itor->first; }
+		// search register assigned to pSym
+		tRegList::const_iterator itor = mRegList.begin();
+		for (; itor != mRegList.end(); itor++) {
+			if (itor->second == pSym) { return itor->first; }
+		}
 	}
+
 	// if not found allocate new (unused) register
 	tRegNr regNr = GetRegister();
 	mpProl16Gen->LoadI(regNr, ((ConstSym*)pSym)->GetVal());

@@ -1,0 +1,9 @@
+PROGRAM Multiply
+BEGIN_VAR
+	a: Integer;
+	b: Integer;
+END_VAR
+BEGIN
+	a := 5 * 3;
+	print(a);
+END

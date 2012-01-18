@@ -1,0 +1,9 @@
+PROGRAM Divide
+BEGIN_VAR
+	a: Integer;
+	b: Integer;
+END_VAR
+BEGIN
+	a := 15 / 3;
+	print(a);
+END

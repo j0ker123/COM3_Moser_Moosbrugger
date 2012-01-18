@@ -9,7 +9,7 @@
 
 using namespace std;
 
-int main(int argc, wchar_t* argv[])
+int main(int argc, char* argv[])
 {	
 	if (argc < 2) {
 		cout << "Usage: <program>.exe <path-to-miec>.miec {<path-to-miec>.miec}" << endl;
@@ -19,13 +19,13 @@ int main(int argc, wchar_t* argv[])
 	FILE* pFile = 0;
 	for( int i = 1; i < argc; i++ )
 	{
-		wstring fileName = argv[i];
-		cout << "parse file: " << fileName.c_str() << endl;
+		wchar_t* fileName = coco_string_create(argv[i]);
+		wcout << "parse file: " << fileName << endl;
 
-		pFile = _wfopen(fileName.c_str(), L"r");
+		pFile = _wfopen(fileName, L"r");
 		if (pFile == 0) 
 		{
-			cout << "Error opening file!" << endl;
+			wcout << "Error opening file!" << endl;
 		}
 		else
 		{
@@ -39,13 +39,14 @@ int main(int argc, wchar_t* argv[])
 
 			size_t const cNrRegisters = 8;
 			MIEC::CodeGenerator codeGen(pParser->pDACGen->GetDACList(), cNrRegisters);
-			codeGen.GenerateCode(fileName);
+			codeGen.GenerateCode(wcscat(fileName, L".iex"));
 
 			delete pParser->pList; pParser->pList = 0;
 			delete pParser->pDACGen; pParser->pDACGen = 0;
 			delete pParser; pParser = 0;
 			delete pScanner; pScanner = 0;
 		}
+		//coco_string_delete(fileName);
 		cout << endl;
 	}
 

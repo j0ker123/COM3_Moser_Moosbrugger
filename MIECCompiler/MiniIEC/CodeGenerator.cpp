@@ -41,6 +41,8 @@ void CodeGenerator::GenerateCode(const std::wstring& arFileName)
 			OperationConditionalJump(sym, mpGenProl16->GetCodePosition()); break;
 		case DACSymbol::ePrint :
 			OperationPrint(sym, mpGenProl16->GetCodePosition()); break;
+		case DACSymbol::eExit :
+			mpGenProl16->Sleep();
 		default:
 			// TODO: ...
 			break;
@@ -245,6 +247,9 @@ void CodeGenerator::OperationConditionalJump(DACSymbol* apDacSym /*, std::map<WO
 ////////////////////////////////////////////////////////////////////////////
 void CodeGenerator::OperationPrint(DACSymbol* apDacSym, DACPosition aDacPos) 
 {
+	tRegNr regA = mpRegAdmin->GetRegister(apDacSym->GetArgument1());	// source
+	
+	mpGenProl16->PrintInt(regA);
 }
 
 } // namespace MIEC

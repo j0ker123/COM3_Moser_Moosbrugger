@@ -96,5 +96,11 @@
     <None Include="examples\Example4.miec">
       <Filter>examples</Filter>
     </None>
+    <None Include="examples\Multiply.miec">
+      <Filter>examples</Filter>
+    </None>
+    <None Include="examples\Divide.miec">
+      <Filter>examples</Filter>
+    </None>
   </ItemGroup>
 </Project>
