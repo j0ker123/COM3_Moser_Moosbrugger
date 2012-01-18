@@ -26,6 +26,10 @@ public:
 
 	DACSymbol(SymbolType* pType, wchar_t* name, OpKind operation, Symbol* pArg1, Symbol* pArg2, DACLabelSymbol* pLabel)
 		: Symbol(pType, name), mOperation(operation), mpArg1(pArg1), mpArg2(pArg2), mpLabel(pLabel) {}
+	DACLabelSymbol* const GetLabel() { return mpLabel; }
+	OpKind const GetOperation() { return mOperation; }
+	Symbol* const GetArgument1() { return mpArg1; }
+	Symbol* const GetArgument2() { return mpArg2; }
 private:
 	DACLabelSymbol* mpLabel;
 	OpKind mOperation;

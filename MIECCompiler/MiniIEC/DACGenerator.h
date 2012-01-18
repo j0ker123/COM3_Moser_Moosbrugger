@@ -8,11 +8,11 @@ namespace MIEC {
 
 class Parser;
 
+typedef std::list<DACSymbol*> tDACList;
+
 class DACGenerator
 {
 public:
-	typedef std::list<DACSymbol*> tDACList;
-
 	DACGenerator(Parser* const pParser);
 	~DACGenerator();
 

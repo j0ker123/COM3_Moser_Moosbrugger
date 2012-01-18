@@ -74,6 +74,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="MiniIEC\CodeGenerator.cpp" />
+    <ClCompile Include="MiniIEC\CodeGenProl16.cpp" />
     <ClCompile Include="MiniIEC\DACGenerator.cpp" />
     <ClCompile Include="MiniIEC\main.cpp" />
     <ClCompile Include="MiniIEC\Parser.cpp" />
@@ -88,8 +90,11 @@
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="MiniIEC\CodeGenerator.h" />
+    <ClInclude Include="MiniIEC\CodeGenProl16.h" />
     <ClInclude Include="MiniIEC\DACGenerator.h" />
     <ClInclude Include="MiniIEC\DACSymbol.h" />
+    <ClInclude Include="MiniIEC\GlobalDef.h" />
     <ClInclude Include="MiniIEC\Parser.h" />
     <ClInclude Include="MiniIEC\Scanner.h" />
     <ClInclude Include="MiniIEC\Symbol.h" />
