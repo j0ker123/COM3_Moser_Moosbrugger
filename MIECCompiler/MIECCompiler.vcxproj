@@ -79,6 +79,7 @@
     <ClCompile Include="MiniIEC\DACGenerator.cpp" />
     <ClCompile Include="MiniIEC\main.cpp" />
     <ClCompile Include="MiniIEC\Parser.cpp" />
+    <ClCompile Include="MiniIEC\RegisterAdmin.cpp" />
     <ClCompile Include="MiniIEC\Scanner.cpp" />
     <ClCompile Include="MiniIEC\SymbolTable.cpp" />
   </ItemGroup>
@@ -96,6 +97,7 @@
     <ClInclude Include="MiniIEC\DACSymbol.h" />
     <ClInclude Include="MiniIEC\GlobalDef.h" />
     <ClInclude Include="MiniIEC\Parser.h" />
+    <ClInclude Include="MiniIEC\RegisterAdmin.h" />
     <ClInclude Include="MiniIEC\Scanner.h" />
     <ClInclude Include="MiniIEC\Symbol.h" />
     <ClInclude Include="MiniIEC\SymbolTable.h" />

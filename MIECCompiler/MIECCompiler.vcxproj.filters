@@ -39,6 +39,9 @@
     <ClCompile Include="MiniIEC\CodeGenerator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="MiniIEC\RegisterAdmin.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MiniIEC\Parser.h">
@@ -66,6 +69,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="MiniIEC\CodeGenerator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MiniIEC\RegisterAdmin.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -50,6 +50,45 @@ void CodeGenerator::GenerateCode(std::wstring const& arFileName)
 	mpGenProl16->WriteIex(arFileName);
 }
 
+
+////////////////////////////////////////////////////////////////////////////
+// Addition
+//
+// result = addend1
+// result += addend2
+//
+////////////////////////////////////////////////////////////////////////////
+void CodeGenerator::OperationAdd(DACSymbol* apDacSym, DACPosition aDacPos)
+{
+	RegNr regA = mpRegAdmin->GetRegister(apDacSym->GetArgument1());	// addend1
+	RegNr regB = mpRegAdmin->GetRegister(apDacSym->GetArgument2()); // addend2
+	RegNr regResult = mpRegAdmin->GetRegister(); // result
+
+	mpGenProl16->Move(regResult, regA);
+	mpGenProl16->Add(regResult, regB);
+
+	mpRegAdmin->AssignRegister(regResult, apDacSym);	// ???
+}
+
+////////////////////////////////////////////////////////////////////////////
+// Subtraction
+//
+// result = muniend
+// result -= subtrahend
+//
+////////////////////////////////////////////////////////////////////////////
+void CodeGenerator::OperationSubtract(DACSymbol* apDacSym, DACPosition aDacPos)
+{
+	RegNr regA = mpRegAdmin->GetRegister(apDacSym->GetArgument1());	// minuend
+	RegNr regB = mpRegAdmin->GetRegister(apDacSym->GetArgument2()); // subtrahend
+	RegNr regResult = mpRegAdmin->GetRegister(); // result
+
+	mpGenProl16->Move(regResult, regA);
+	mpGenProl16->Sub(regResult, regB);
+
+	mpRegAdmin->AssignRegister(regResult, apDacSym);	// ???
+}
+
 ////////////////////////////////////////////////////////////////////////////
 // Multiplication by shift
 //
@@ -162,4 +201,20 @@ void CodeGenerator::OperationDivide(DACSymbol* apDacSym)
 	mpRegAdmin->FreeRegister(helpReg);
 }
 
-} // MIEC
+////////////////////////////////////////////////////////////////////////////
+// Assignment
+//
+// result = source
+//
+////////////////////////////////////////////////////////////////////////////
+void CodeGenerator::OperationAssign(DACSymbol* apDacSym, DACPosition aDacPos)
+{
+	RegNr regA = mpRegAdmin->GetRegister(apDacSym->GetArgument1());	// destination
+	RegNr regB = mpRegAdmin->GetRegister(apDacSym->GetArgument2());	// source
+
+	mpGenProl16->Move(regA, regB);
+
+	mpRegAdmin->AssignRegister(regA, apDacSym);	// ???
+}
+
+} // namespace MIEC

@@ -1,5 +1,5 @@
-#ifndef CODEGENERATOR_H
-#define CODEGENERATOR_H
+#ifndef CODEGENERATOR_H_
+#define CODEGENERATOR_H_
 
 #include "DACGenerator.h"
 #include "CodeGenProl16.h"
@@ -8,7 +8,7 @@ namespace MIEC {
 
 class CodeGenerator {
 public:
-	CodeGenerator(tDACList const * apDacList);
+	CodeGenerator(tDACList const* apDacList);
 	~CodeGenerator();
 
 	void GenerateCode(std::wstring const& arFileName);
@@ -31,6 +31,6 @@ private:
 	RegisterAdmin* mpRegAdmin;
 };
 
-} // MIEC
+} // namespace MIEC
 
-#endif // CODEGENERATOR_H
+#endif // #ifndef CODEGENERATOR_H_
