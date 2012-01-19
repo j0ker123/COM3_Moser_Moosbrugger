@@ -74,7 +74,7 @@ Branch<Symbol* &pSym>					(. DACLabelSymbol* pLblElse = pDACGen->GetNewLabel(); 
 	  [ "ELSE"							(. pList->AddSymbol(pDACGen->AddStat(DACSymbol::eJump, pLblNext, 0)); pList->AddSymbol(pDACGen->AddLabel(pLblElse)); .)	                                       
 	    Statements						(. pList->AddSymbol(pDACGen->AddLabel(pLblNext)); .)
 	  ] 
-	  "END"								(. pList->AddSymbol(pDACGen->AddLabel(pLblElse)); .)
+	  "END"								(. pDACGen->AddLabel(pLblElse); .)
 	.
 
 Loop<Symbol* &pSym>						(. DACLabelSymbol* pLblCond = pDACGen->GetNewLabel(); DACLabelSymbol* pLblNext = pDACGen->GetNewLabel(); .)

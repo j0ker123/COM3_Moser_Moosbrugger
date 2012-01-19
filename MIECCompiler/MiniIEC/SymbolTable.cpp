@@ -29,12 +29,12 @@ Symbol* const SymbolTable::AddSymbol(Symbol* pSymbol)
 	}
 
 	std::pair<tSymbolList::iterator, bool> ret = mSymbolList.insert(tSymbolEntry(pName, pSymbol));
-	if (ret.second == false) 
+	if (ret.second == false)
 	{
 		//mpParser->Err(L"AddSymbol: symbol already defined");
 
-		delete pSymbol;
-		pSymbol = ret.first->second;
+		//delete pSymbol;
+		//pSymbol = ret.first->second;
 	}
 		
 	return ret.first->second;
