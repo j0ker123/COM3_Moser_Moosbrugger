@@ -1,1 +1,0 @@
-for /f %%a IN ('dir /b *.miec') do "../Debug/MIECCompiler.exe" %%a > %%a.log

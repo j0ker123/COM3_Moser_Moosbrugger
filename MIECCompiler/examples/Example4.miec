@@ -1,8 +1,16 @@
 PROGRAM Example4
+BEGIN_VAR
+	a: Integer;
+	b: Integer;
+END_VAR
 BEGIN
-	IF 1 < 2 THEN
-		print(1);
-	ELSE
-		print(0);
-	END
+	a := 1;
+	b := 2;
+	
+	IF a = b THEN print(1); ELSE print(0); END
+	IF a != b THEN print(1); ELSE print(0); END
+	IF a < b THEN print(1); ELSE print(0); END
+	IF a > b THEN print(1); ELSE print(0); END
+	IF a <= b THEN print(1); ELSE print(0); END
+	IF a >= b THEN print(1); ELSE print(0); END
 END
