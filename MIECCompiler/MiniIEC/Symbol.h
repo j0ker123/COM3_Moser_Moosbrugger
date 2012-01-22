@@ -9,30 +9,33 @@ namespace MIEC {
 class Symbol
 {
 public:
+	virtual ~Symbol() { coco_string_delete(mName); }
+
 	typedef enum { eConst, eVar, eTempVar, eLabel } tSymbolType;
-
-	~Symbol() { coco_string_delete(mName); }
-
-	DataType* const GetType() { return mpType; }
-	wchar_t* const GetName() { return mName; }
+	tSymbolType const GetType() const { return mType; }
+	wchar_t* const GetName() const { return mName; }
+	DataType* const GetDataType() const { return mpDataType; }
 
 protected:
-	Symbol(DataType* const pType, wchar_t* const name)
-		: mpType(pType), mName(coco_string_create(name)) { }
+	Symbol(tSymbolType const symbolType, wchar_t* const symbolName, DataType* const pDataType)
+		: mType(symbolType), mName(coco_string_create(symbolName)), mpDataType(pDataType) { }
 
 private:
 	Symbol();
 
-	DataType* const mpType;
+	tSymbolType const mType;
 	wchar_t* mName;
+	DataType* const mpDataType;
 };
 
 class ConstSym : public Symbol
 {
 public:
-	ConstSym(DataType* const pType, wchar_t* const name, int const val)
-		: Symbol(pType, name), mVal(val) { }
-	int GetVal() { return mVal; }
+	ConstSym(DataType* const pDataType, wchar_t* const name, int const val)
+		: Symbol(Symbol::eConst, name, pDataType), mVal(val) { }
+
+	int GetVal() const { return mVal; }
+
 private:
 	int const mVal;
 };
@@ -40,9 +43,11 @@ private:
 class VarSym : public Symbol
 {
 public:
-	VarSym(DataType* const pType, wchar_t* const name, size_t const addr)
-		: Symbol(pType, name), mAddr(addr) { }
-	int GetAddr() { return mAddr; }
+	VarSym(DataType* const pDataType, wchar_t* const name, size_t const addr)
+		: Symbol(Symbol::eVar, name, pDataType), mAddr(addr) { }
+
+	int GetAddr() const { return mAddr; }
+
 private:
 	size_t const mAddr;
 };
