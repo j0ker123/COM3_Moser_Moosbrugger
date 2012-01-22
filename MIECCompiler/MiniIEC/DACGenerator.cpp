@@ -29,15 +29,15 @@ wchar_t* CreateString(wchar_t* prefix, size_t number)
 	return pName;
 }
 
-DACLabelSymbol* const DACGenerator::GetNewLabel() 
+DACLabel* const DACGenerator::GetNewLabel() 
 {
 	DataType* pType = 0; //UnknownType;
 	wchar_t* pName = CreateString(L"$L", mLabelNumber++);
 
-	return new DACLabelSymbol(pType, pName, /* TODO: address of label in bytecode */ 0);
+	return new DACLabel(pType, pName, /* TODO: address of label in bytecode */ 0);
 }
 
-DACLabelSymbol* const DACGenerator::AddLabel(DACLabelSymbol* pLabel)
+DACLabel* const DACGenerator::AddLabel(DACLabel* pLabel)
 {
 	if (pLabel == 0) { return 0; }
 
@@ -56,7 +56,7 @@ DACSymbol* const DACGenerator::AddStat(DACSymbol::OpKind op, Symbol* pArg1, Symb
 
 	size_t err = 0;	// error counter
 
-	DataType* pType = 0; //UnknownType;
+	DataType* pDataType = 0; //UnknownType;
 
 	if (op == DACSymbol::eUnknown) {
 		mpParser->Err(L"AddStat: invalid operation");
@@ -86,7 +86,7 @@ DACSymbol* const DACGenerator::AddStat(DACSymbol::OpKind op, Symbol* pArg1, Symb
 			//return 0;
 		}
 		else { 
-			pType = pArg1->GetType();
+			pDataType = pArg1->GetDataType();
 		}
 
 		switch (op) {
@@ -95,17 +95,15 @@ DACSymbol* const DACGenerator::AddStat(DACSymbol::OpKind op, Symbol* pArg1, Symb
 				break;
 			case DACSymbol::eAdd: case DACSymbol::eSubtract: case DACSymbol::eMultiply: case DACSymbol::eDivide:
 				if (pArg2 == 0) { mpParser->Err(L"AddStat: invalid right parameter"); err++; break; }
-				if (pType != pArg2->GetType()) { mpParser->Err(L"AddStat: incompatible types"); err++; break; }
+				if (pDataType != pArg2->GetDataType()) { mpParser->Err(L"AddStat: incompatible types"); err++; break; }
 				break;
 			case DACSymbol::eIsEqual: case DACSymbol::eIsNotEqual: case DACSymbol::eIsLessEqual: case DACSymbol::eIsGreaterEqual: case DACSymbol::eIsLess: case DACSymbol::eIsGreater:
 				if (pArg2 == 0) { mpParser->Err(L"AddStat: invalid right parameter"); err++; break; }
-				// TODO: pType = boolean;
+				// TODO: pDataType = boolean;
 				break;
 			case DACSymbol::eIfJump: case DACSymbol::eIfFalseJump:
+				// TODO: if (pDataType != boolean) { mpParser->Err(L"AddStat: invalid condition"); err++; break; }
 				if (pArg2 == 0) { mpParser->Err(L"AddStat: invalid jump destination"); err++; break; }
-			case DACSymbol::eJump: 
-				// TODO: if (pType != boolean) { mpParser->Err(L"AddStat: invalid condition"); err++; break; }
-				// TODO: pType = LabelType;
 				break;
 			default:
 				if (pArg2 != 0) { mpParser->Err(L"AddStat: too much parameters"); err++; }
@@ -116,7 +114,7 @@ DACSymbol* const DACGenerator::AddStat(DACSymbol::OpKind op, Symbol* pArg1, Symb
 
 	wchar_t* pName = CreateString(L"$t", mpDACList->size());
 
-	DACSymbol* stat = new DACSymbol(pType, pName, op, pArg1, pArg2, mpCurrLabel);
+	DACSymbol* stat = new DACSymbol(pDataType, pName, op, pArg1, pArg2, mpCurrLabel);
 	mpDACList->push_back(stat);
 
 	mpCurrLabel = 0;
