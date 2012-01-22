@@ -101,6 +101,7 @@
     <ClInclude Include="MiniIEC\Scanner.h" />
     <ClInclude Include="MiniIEC\Symbol.h" />
     <ClInclude Include="MiniIEC\SymbolTable.h" />
+    <ClInclude Include="MiniIEC\DataType.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="examples\Divide.miec" />

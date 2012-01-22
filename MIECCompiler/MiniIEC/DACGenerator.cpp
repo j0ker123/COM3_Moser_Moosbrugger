@@ -31,7 +31,7 @@ wchar_t* CreateString(wchar_t* prefix, size_t number)
 
 DACLabelSymbol* const DACGenerator::GetNewLabel() 
 {
-	static LabelType* pType = new LabelType();
+	DataType* pType = 0; //UnknownType;
 	wchar_t* pName = CreateString(L"$L", mLabelNumber++);
 
 	return new DACLabelSymbol(pType, pName, /* TODO: address of label in bytecode */ 0);
@@ -56,7 +56,7 @@ DACSymbol* const DACGenerator::AddStat(DACSymbol::OpKind op, Symbol* pArg1, Symb
 
 	size_t err = 0;	// error counter
 
-	SymbolType* pType = 0; //UnknownType;
+	DataType* pType = 0; //UnknownType;
 
 	if (op == DACSymbol::eUnknown) {
 		mpParser->Err(L"AddStat: invalid operation");

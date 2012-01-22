@@ -74,6 +74,9 @@
     <ClInclude Include="MiniIEC\RegisterAdmin.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="MiniIEC\DataType.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="MiniIEC\MIEC.atg">
