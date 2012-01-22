@@ -40,15 +40,26 @@ const size_t RegisterAdmin::GetRegister(const Symbol* const pSym)
 		}
 	}
 
-	// if not found allocate new (unused) register
+	// if not found allocate new (unused) register and load value
+	size_t addrRegNr = -1;
 	size_t regNr = GetRegister();
-	// TODO: if constant
-	mpProl16Gen->LoadI(regNr, ((ConstSym*)pSym)->GetVal());
-	// TODO: if variable
-	//tRegNr addrRegNr = GetRegister();
-	//mpProl16Gen->LoadI(addrRegNr, ((VarSym*)pSym)->GetAddr());
-	//mpProl16Gen->Load(regNr, addrRegNr);
-	//FreeRegister(addrRegNr);
+	switch (pSym->GetType()) {
+		case Symbol::eConst:
+			// load register with immediate value
+			mpProl16Gen->LoadI(regNr, ((ConstSym*)pSym)->GetVal());
+			break;
+		case Symbol::eVar:
+			addrRegNr = GetRegister();
+			// load address register with address
+			mpProl16Gen->LoadI(addrRegNr, ((VarSym*)pSym)->GetAddr());
+			mpProl16Gen->Load(regNr, addrRegNr);
+			FreeRegister(addrRegNr);
+			break;
+		default:
+			assert(false);
+			break;
+	}
+	AssignRegister(regNr, pSym);
 	return regNr;
 }
 
