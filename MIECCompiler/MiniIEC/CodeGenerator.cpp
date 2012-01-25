@@ -223,7 +223,7 @@ void CodeGenerator::OperationAssign(DACSymbol* apDacSym, tDACPosition aDacPos)
 	tRegNr regA = mpRegAdmin->GetRegister(apDacSym->GetArgument2());	// source
 	tRegNr regB = mpRegAdmin->GetRegister();	// destination address
 
-	mpGenProl16->LoadI(regB, ((VarSym*)apDacSym)->GetAddr());
+	mpGenProl16->LoadI(regB, ((VarSym*)(apDacSym->GetArgument1()))->GetAddr());
 	mpGenProl16->Store(regA, regB);
 
 	mpRegAdmin->AssignRegister(regA, apDacSym->GetArgument1());
@@ -240,9 +240,12 @@ void CodeGenerator::OperationAssign(DACSymbol* apDacSym, tDACPosition aDacPos)
 void CodeGenerator::OperationJump(DACSymbol* apDacSym, tJumpLblList& arUnresolvedJumps)
 {
 	tRegNr regJump = mpRegAdmin->GetRegister();
+
 	WORD jumpNext = mpGenProl16->LoadI(regJump, 0);
-	arUnresolvedJumps.insert(tJumpLblEntry((DACLabel*)(apDacSym->GetArgument1()), jumpNext));
 	mpGenProl16->Jump(regJump);
+
+	arUnresolvedJumps.insert(tJumpLblEntry((DACLabel*)(apDacSym->GetArgument1()), jumpNext));
+	mpRegAdmin->FreeRegister(regJump);
 }
 
 ////////////////////////////////////////////////////////////////////////////
@@ -257,27 +260,54 @@ void CodeGenerator::OperationConditionalJump(DACSymbol* apDacSym, tJumpLblList& 
 	tRegNr regB = -1;
 
 	DACSymbol* pBranchCond = (DACSymbol*)(apDacSym->GetArgument1());
-	if (apDacSym->GetOperation() == DACSymbol::eIfFalseJump) {
-		regA = mpRegAdmin->GetRegister(pBranchCond->GetArgument2());
-		regB = mpRegAdmin->GetRegister(pBranchCond->GetArgument1());
-	}
-	else {
-		regA = mpRegAdmin->GetRegister(pBranchCond->GetArgument1());
-		regB = mpRegAdmin->GetRegister(pBranchCond->GetArgument2());
-	}
+	regA = mpRegAdmin->GetRegister(pBranchCond->GetArgument1());
+	regB = mpRegAdmin->GetRegister(pBranchCond->GetArgument2());
 
 	tRegNr regJump = mpRegAdmin->GetRegister();
 	WORD jumpElse = mpGenProl16->LoadI(regJump, 0);
-	arUnresolvedJumps.insert(tJumpLblEntry((DACLabel*)(apDacSym->GetArgument2()), jumpElse));
 
-	switch (pBranchCond->GetOperation()) {
+	DACSymbol::OpKind op = pBranchCond->GetOperation();
+	if (apDacSym->GetOperation() == DACSymbol::eIfFalseJump) {
+		switch (op) {
+			case DACSymbol::eIsEqual:
+				op = DACSymbol::eIsNotEqual; break;
+			case DACSymbol::eIsNotEqual:
+				op = DACSymbol::eIsEqual; break;
+			case DACSymbol::eIsLessEqual:
+				op = DACSymbol::eIsGreater; break;
+			case DACSymbol::eIsGreaterEqual:
+				op = DACSymbol::eIsLess; break;
+			case DACSymbol::eIsLess:
+				op = DACSymbol::eIsGreaterEqual; break;
+			case DACSymbol::eIsGreater:
+				op = DACSymbol::eIsLessEqual; break;
+			default: 
+				break;
+		}
+	}
+
+	switch (op) {
 		case DACSymbol::eIsEqual:
 			mpGenProl16->Comp(regA, regB);
 			mpGenProl16->JumpZ(regJump);
 			break;
 		case DACSymbol::eIsNotEqual:
 			mpGenProl16->Comp(regA, regB);
+			mpGenProl16->JumpZ(regJump);
+			mpGenProl16->SetAddress(jumpElse, mpGenProl16->GetCodePosition() + 3*sizeof(WORD));
+			jumpElse = mpGenProl16->LoadI(regJump, 0);
+			mpGenProl16->Jump(regJump);
+			mpRegAdmin->FreeRegister(regJump);
+			break;
+		case DACSymbol::eIsLessEqual:
+			mpGenProl16->Comp(regA, regB);
 			mpGenProl16->JumpC(regJump);
+			mpGenProl16->JumpZ(regJump);
+			break;
+		case DACSymbol::eIsGreaterEqual:
+			mpGenProl16->Comp(regB, regA);
+			mpGenProl16->JumpC(regJump);
+			mpGenProl16->JumpZ(regJump);
 			break;
 		case DACSymbol::eIsLess:
 			mpGenProl16->Comp(regA, regB);
@@ -291,6 +321,7 @@ void CodeGenerator::OperationConditionalJump(DACSymbol* apDacSym, tJumpLblList& 
 			break;
 	}
 
+	arUnresolvedJumps.insert(tJumpLblEntry((DACLabel*)(apDacSym->GetArgument2()), jumpElse));
 	mpRegAdmin->FreeRegister(regJump);
 	mpRegAdmin->FreeRegister(regA);
 	mpRegAdmin->FreeRegister(regB);

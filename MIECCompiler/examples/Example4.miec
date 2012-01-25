@@ -5,12 +5,15 @@ BEGIN_VAR
 END_VAR
 BEGIN
 	a := 1;
-	b := 2;
+	b := 0;
 	
 	IF a = b THEN print(1); ELSE print(0); END
 	IF a != b THEN print(1); ELSE print(0); END
+	
 	IF a < b THEN print(1); ELSE print(0); END
 	IF a > b THEN print(1); ELSE print(0); END
+	
 	IF a <= b THEN print(1); ELSE print(0); END
 	IF a >= b THEN print(1); ELSE print(0); END
+	
 END
