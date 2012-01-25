@@ -3,10 +3,12 @@ PROGRAM Example1
 		i: Integer;
 	END_VAR
 BEGIN
-	i := 0;
+	i := 1;
 	WHILE i < 10 DO
 		IF i - (i / 2) * 2 = 0 THEN		(* i % 2 == 0 *)
 			print(i);
 		END
+		i := i + 1;
+		print(i);
 	END
 END

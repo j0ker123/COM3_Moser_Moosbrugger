@@ -28,8 +28,13 @@ void CodeGenerator::GenerateCode(const std::wstring& arFileName)
 		DACLabel* pLabel = pSym->GetLabel();
 		if (pLabel != 0) {
 			tJumpLblList::iterator ret = jumpLblList.find(pLabel);
-			mpGenProl16->SetAddress(ret->second, mpGenProl16->GetCodePosition());
-			jumpLblList.erase(ret);
+			if (ret != jumpLblList.end()) {
+				mpGenProl16->SetAddress(ret->second, mpGenProl16->GetCodePosition());
+				jumpLblList.erase(ret);
+			}
+			else {
+				jumpLblList.insert(tJumpLblEntry(pLabel, mpGenProl16->GetCodePosition()));
+			}
 		}
 
 		DACSymbol::OpKind op = pSym->GetOperation();
@@ -241,10 +246,18 @@ void CodeGenerator::OperationJump(DACSymbol* apDacSym, tJumpLblList& arUnresolve
 {
 	tRegNr regJump = mpRegAdmin->GetRegister();
 
-	WORD jumpNext = mpGenProl16->LoadI(regJump, 0);
+	DACLabel* const pLabel = (DACLabel*)(apDacSym->GetArgument1());
+	tJumpLblList::iterator ret = arUnresolvedJumps.find(pLabel);
+	if (ret == arUnresolvedJumps.end()) {
+		WORD jumpNext = mpGenProl16->LoadI(regJump, 0);
+		arUnresolvedJumps.insert(tJumpLblEntry(pLabel, jumpNext));
+	}
+	else {
+		mpGenProl16->LoadI(regJump, ret->second);
+		arUnresolvedJumps.erase(ret);
+	}
 	mpGenProl16->Jump(regJump);
 
-	arUnresolvedJumps.insert(tJumpLblEntry((DACLabel*)(apDacSym->GetArgument1()), jumpNext));
 	mpRegAdmin->FreeRegister(regJump);
 }
 
@@ -339,7 +352,7 @@ void CodeGenerator::OperationPrint(DACSymbol* apDacSym, tDACPosition aDacPos)
 	
 	mpGenProl16->PrintInt(regA);
 
-	mpRegAdmin->FreeRegister(regA);
+	//mpRegAdmin->FreeRegister(regA);
 }
 
 } // namespace MIEC
