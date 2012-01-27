@@ -12,11 +12,13 @@ SymbolTable::SymbolTable(Parser* const pParser)
 
 SymbolTable::~SymbolTable()
 {
+	// for each entry in SymbolTable...
 	tSymbolList::iterator itor = mSymbolList.begin();
 	for (; itor != mSymbolList.end(); itor++) {
 		// delete symbol
-		delete itor->second;
+		delete itor->second; itor->second = 0;
 	}
+	// erase all entries
 	mSymbolList.clear();
 }
 
@@ -29,7 +31,7 @@ Symbol* const SymbolTable::AddSymbol(Symbol* pSymbol)
 		return 0;
 	}
 	wchar_t* pName = pSymbol->GetName();
-	if (pName == 0 || pName == L"") {
+	if (pName == 0 || coco_string_equal(pName, L"")) {
 		mpParser->Err(L"AddSymbol: invalid symbol name");
 		return 0;
 	}
@@ -51,7 +53,7 @@ Symbol* const SymbolTable::FindSymbol(wchar_t* const pName)
 {
 	assert(mpParser != 0);
 
-	if (pName == 0 || pName == L"") { 
+	if (pName == 0 || coco_string_equal(pName, L"")) { 
 		mpParser->Err(L"FindSymbol: invalid symbol name");
 		return 0; 
 	}

@@ -2,7 +2,10 @@
 #define DACGENERATOR_H_
 
 #include <list>
+#include "DataType.h"
+#include "Symbol.h"
 #include "DACSymbol.h"
+#include "SymbolTable.h"
 
 namespace MIEC {
 
@@ -18,10 +21,16 @@ public:
 
 	DACLabel* const GetNewLabel();
 
-	DACLabel* const AddLabel(DACLabel* pLabel);
-	DACSymbol* const AddStat(DACSymbol::OpKind op, Symbol* pArg1, Symbol* pArg2);
+	DataType* const AddType(DataType* pType);
+	Symbol* const AddSymbol(Symbol* pSymbol);
+	DACLabel* const AddLabel(DACLabel* const pLabel);
+	DACSymbol* const AddStat(DACSymbol::OpKind const op, Symbol* const pArg1, Symbol* const pArg2);
 
-	tDACList const*const GetDACList() const;
+	Symbol* const FindSymbol(wchar_t* const pName);
+
+	const SymbolTable& GetSymbolList() const;
+	const tDACList& GetDACList() const;
+	size_t const GetErrorCounter() const;
 
 private:
 	DACGenerator();
@@ -29,10 +38,12 @@ private:
 	DACGenerator& operator= (const DACGenerator&);
 
 	Parser* const mpParser;
-	tDACList* const mpDACList;
+	SymbolTable mSymbolTable;
+	tDACList mDACList;
 
 	size_t mLabelNumber;
 	DACLabel* mpCurrLabel;
+	size_t mErrorCounter;
 };
 
 } // namespace MIEC

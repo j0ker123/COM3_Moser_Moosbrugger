@@ -27,20 +27,24 @@ void CodeGenerator::GenerateCode(const std::wstring& arFileName)
 	{
 		// get DAC
 		DACSymbol* pSym = *itor;
+		// get code position
+		WORD const codePos = mpGenProl16->GetCodePosition();
 
 		// get label linked with DAC (if there is one)
 		DACLabel* pLabel = pSym->GetLabel();
 		if (pLabel != 0) {
+			// set label address
+			pLabel->SetAddr(codePos);
 			// search for bookmarked code positions using label
 			tJumpLblList::iterator ret = jumpLblList.find(pLabel);
 			if (ret != jumpLblList.end()) {
 				// write current code position as label address to program code
-				mpGenProl16->SetAddress(ret->second, mpGenProl16->GetCodePosition());
+				mpGenProl16->SetAddress(ret->second, codePos);
 				jumpLblList.erase(ret);
 			}
 			else {
 				// bookmark current code position as label address
-				jumpLblList.insert(tJumpLblEntry(pLabel, mpGenProl16->GetCodePosition()));
+				jumpLblList.insert(tJumpLblEntry(pLabel, codePos));
 			}
 		}
 
@@ -275,6 +279,7 @@ void CodeGenerator::OperationJump(DACSymbol* apDacSym, tJumpLblList& arUnresolve
 	tJumpLblList::iterator ret = arUnresolvedJumps.find(pLabel);
 	if (ret == arUnresolvedJumps.end()) {
 		WORD jumpNext = mpGenProl16->LoadI(regJump, 0);
+		// label address unknown -> bookmark code position of jump destination to be replaced later
 		arUnresolvedJumps.insert(tJumpLblEntry(pLabel, jumpNext));
 	}
 	else {
@@ -357,6 +362,7 @@ void CodeGenerator::OperationConditionalJump(DACSymbol* apDacSym, tJumpLblList& 
 			break;
 	}
 
+	// label address unknown -> bookmark code position of jump destination to be replaced later
 	arUnresolvedJumps.insert(tJumpLblEntry((DACLabel*)(apDacSym->GetArgument2()), jumpElse));
 
 	// free all registers

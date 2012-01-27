@@ -8,9 +8,10 @@ class DataType;
 class Symbol
 {
 public:
+	typedef enum { eType, eConst, eVar, eTempVar, eLabel } tSymbolType;
+
 	virtual ~Symbol();
 
-	typedef enum { eType, eConst, eVar, eTempVar, eLabel } tSymbolType;
 	tSymbolType const GetType() const;
 	wchar_t* const GetName() const;
 	DataType* const GetDataType() const;
@@ -31,16 +32,16 @@ private:
 class ConstSym : public Symbol
 {
 public:
-	ConstSym(DataType* const pDataType, wchar_t* const name, int const val);
+	ConstSym(DataType* const pDataType, wchar_t* const name, double const val);
 
-	int GetVal() const;
+	double const GetVal() const;
 
 private:
 	ConstSym();
 	ConstSym(const ConstSym&);
 	ConstSym& operator= (const ConstSym&);
 
-	int const mVal;
+	double const mVal;
 };
 
 class VarSym : public Symbol
@@ -48,7 +49,7 @@ class VarSym : public Symbol
 public:
 	VarSym(DataType* const pDataType, wchar_t* const name, size_t const addr);
 
-	int GetAddr() const;
+	size_t const GetAddr() const;
 
 private:
 	VarSym();

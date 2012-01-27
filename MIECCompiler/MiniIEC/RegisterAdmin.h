@@ -2,7 +2,6 @@
 #define REGISTERADMIN_H_
 
 #include <map>
-#include "GlobalDef.h"
 #include "Symbol.h"
 #include "CodeGenProl16.h"
 
@@ -10,13 +9,13 @@ namespace MIEC {
 
 class RegisterAdmin {
 public:
-	RegisterAdmin(CodeGenProl16* const pProl16Gen, const size_t nrRegs);
+	RegisterAdmin(CodeGenProl16* const pProl16Gen, size_t const nrRegs);
 	~RegisterAdmin();
 
-	const size_t GetRegister();
-	const size_t GetRegister(const Symbol* const pSym);
-	void AssignRegister(const size_t regNr, const Symbol* const pSym);
-	void FreeRegister(const size_t regNr);
+	size_t const GetRegister();
+	size_t const GetRegister(const Symbol* const pSym);
+	void AssignRegister(size_t const regNr, const Symbol* const pSym);
+	void FreeRegister(size_t const regNr);
 
 private:
 	RegisterAdmin();
@@ -24,7 +23,7 @@ private:
 	RegisterAdmin& operator= (const RegisterAdmin&);
 
 	CodeGenProl16* const mpProl16Gen;
-	const size_t mNrRegisters;
+	size_t const mNrRegisters;
 
 	typedef std::pair<const size_t, const Symbol*> tRegEntry;
 	typedef std::map<const size_t, const Symbol*> tRegList;

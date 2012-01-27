@@ -8,7 +8,7 @@ namespace MIEC {
 class DACLabel : public Symbol
 {
 public:
-	DACLabel(DataType* pDataType, wchar_t* name);
+	DACLabel(wchar_t* const name);
 
 	size_t const GetAddr() const;
 	void SetAddr(size_t const addr);
@@ -26,7 +26,7 @@ public:
 		eJump, eIfJump, eIfFalseJump, 
 		eAssign, ePrint, eExit };
 
-	DACSymbol(DataType* pDataType, wchar_t* name, OpKind operation, Symbol* pArg1, Symbol* pArg2, DACLabel* pLabel);
+	DACSymbol(DataType* const pDataType, wchar_t* const name, OpKind const operation, Symbol* const pArg1, Symbol* const pArg2, DACLabel* const pLabel);
 
 	DACLabel* const GetLabel() const;
 	OpKind const GetOperation() const;

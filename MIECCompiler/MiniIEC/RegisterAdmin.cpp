@@ -3,7 +3,7 @@
 
 namespace MIEC {
 
-RegisterAdmin::RegisterAdmin(CodeGenProl16* const pProl16Gen, const size_t nrRegs)
+RegisterAdmin::RegisterAdmin(CodeGenProl16* const pProl16Gen, size_t const nrRegs)
 	: mpProl16Gen(pProl16Gen), mNrRegisters(nrRegs)
 {
 	assert(pProl16Gen != 0);
@@ -13,7 +13,7 @@ RegisterAdmin::~RegisterAdmin()
 {
 }
 
-const size_t RegisterAdmin::GetRegister()
+size_t const RegisterAdmin::GetRegister()
 {
 	// search unused register
 	size_t regNr = 0;
@@ -27,7 +27,7 @@ const size_t RegisterAdmin::GetRegister()
 	return regNr;
 }
 
-const size_t RegisterAdmin::GetRegister(const Symbol* const pSym)
+size_t const RegisterAdmin::GetRegister(const Symbol* const pSym)
 {
 	assert(mpProl16Gen != 0);
 
@@ -71,7 +71,7 @@ const size_t RegisterAdmin::GetRegister(const Symbol* const pSym)
 	return regNr;
 }
 
-void RegisterAdmin::AssignRegister(const size_t regNr, const Symbol* const pSym)
+void RegisterAdmin::AssignRegister(size_t const regNr, const Symbol* const pSym)
 {
 	assert(pSym != 0);
 
@@ -80,7 +80,7 @@ void RegisterAdmin::AssignRegister(const size_t regNr, const Symbol* const pSym)
 	ret->second = pSym;
 }
 
-void RegisterAdmin::FreeRegister(const size_t regNr)
+void RegisterAdmin::FreeRegister(size_t const regNr)
 {
 	// free (set unused) regNr
 	mRegList.erase(regNr);
