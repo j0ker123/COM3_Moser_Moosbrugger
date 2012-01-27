@@ -14,7 +14,7 @@ class DACGenerator
 {
 public:
 	DACGenerator(Parser* const pParser);
-	~DACGenerator();
+	virtual ~DACGenerator();
 
 	DACLabel* const GetNewLabel();
 
@@ -24,6 +24,10 @@ public:
 	tDACList const*const GetDACList() const;
 
 private:
+	DACGenerator();
+	DACGenerator(const DACGenerator&);
+	DACGenerator& operator= (const DACGenerator&);
+
 	Parser* const mpParser;
 	tDACList* const mpDACList;
 
@@ -31,6 +35,6 @@ private:
 	DACLabel* mpCurrLabel;
 };
 
-} // MIEC
+} // namespace MIEC
 
-#endif // DACGENERATOR_H_
+#endif // #ifndef DACGENERATOR_H_

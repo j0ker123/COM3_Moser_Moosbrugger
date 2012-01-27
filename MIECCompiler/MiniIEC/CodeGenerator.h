@@ -8,16 +8,20 @@
 
 namespace MIEC {
 
-typedef BYTE tRegNr;
-
 class CodeGenerator {
 public:
+	typedef BYTE tRegNr;
+
 	CodeGenerator(const tDACList* const apDacList, const size_t nrRegisters);
 	~CodeGenerator();
 
 	void GenerateCode(const std::wstring& arFileName);
 
 private:
+	CodeGenerator();
+	CodeGenerator(const CodeGenerator&);
+	CodeGenerator& operator= (const CodeGenerator&);
+
 	typedef tDACList::size_type tDACPosition;
 	typedef std::pair<DACLabel*, WORD> tJumpLblEntry;
 	typedef std::map<DACLabel*, WORD> tJumpLblList;

@@ -1,4 +1,3 @@
-
 #ifndef REGISTERADMIN_H_
 #define REGISTERADMIN_H_
 
@@ -20,6 +19,10 @@ public:
 	void FreeRegister(const size_t regNr);
 
 private:
+	RegisterAdmin();
+	RegisterAdmin(const RegisterAdmin&);
+	RegisterAdmin& operator= (const RegisterAdmin&);
+
 	CodeGenProl16* const mpProl16Gen;
 	const size_t mNrRegisters;
 

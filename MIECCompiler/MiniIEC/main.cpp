@@ -1,4 +1,9 @@
 
+// enable memory leak detection
+#define _CRTDBG_MAP_ALLOC
+#include <stdlib.h>
+#include <crtdbg.h>
+
 #include <stdio.h>
 #include <string>
 #include <iostream>
@@ -20,7 +25,7 @@ int main(int argc, char* argv[])
 	for( int i = 1; i < argc; i++ )
 	{
 		wchar_t* fileName = coco_string_create(argv[i]);
-		wcout << "parse file: " << fileName << endl;
+		wcout << "Input file: " << fileName << endl;
 
 		pFile = _wfopen(fileName, L"r");
 		if (pFile == 0) 
@@ -35,23 +40,30 @@ int main(int argc, char* argv[])
 			pParser->pList = new MIEC::SymbolTable( pParser );
 			pParser->pDACGen = new MIEC::DACGenerator( pParser );
 			pParser->Parse();
-			cout << "Parse errors: " << pParser->errors->count << endl;
+			wcout << "Parse errors: " << pParser->errors->count << endl;
 
 			size_t const cNrRegisters = 8;
 			MIEC::CodeGenerator codeGen(pParser->pDACGen->GetDACList(), cNrRegisters);
-			codeGen.GenerateCode(wcscat(fileName, L".iex"));
+			coco_string_merge(fileName, L".iex");
+			codeGen.GenerateCode(fileName);
+			wcout << "Code generated: " << fileName << endl;
 
-			delete pParser->pList; pParser->pList = 0;
 			delete pParser->pDACGen; pParser->pDACGen = 0;
+			delete pParser->pList; pParser->pList = 0;
 			delete pParser; pParser = 0;
 			delete pScanner; pScanner = 0;
 		}
-		//coco_string_delete(fileName);
+		fclose(pFile);
+
+		coco_string_delete(fileName);
 		cout << endl;
 	}
 
-	cout << "Press any key . . .";
-	getchar();
+	//cout << "Press any key . . .";
+	//getchar();
+
+	// memory leak dump
+	_CrtDumpMemoryLeaks();
 
 	return 0;
 }

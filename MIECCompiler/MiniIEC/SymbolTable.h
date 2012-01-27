@@ -3,6 +3,7 @@
 
 #include <map>
 #include <functional>
+#include "Scanner.h"
 #include "Symbol.h"
 
 namespace MIEC {
@@ -23,16 +24,20 @@ public:
 	typedef std::map<wchar_t*, Symbol*, NameCompare> tSymbolList;
 
 	SymbolTable(Parser* const pParser);
-	~SymbolTable();
+	virtual ~SymbolTable();
 
 	Symbol* const AddSymbol(Symbol* pSymbol);
 	Symbol* const FindSymbol(wchar_t* const pName);
 
 private:
+	SymbolTable();
+	SymbolTable(const SymbolTable&);
+	SymbolTable& operator= (const SymbolTable&);
+
 	Parser* const mpParser;
 	tSymbolList mSymbolList;
 };
 
-} // MIEC
+} // namespace MIEC
 
-#endif // SYMBOLTABLE_H_
+#endif // #ifndef SYMBOLTABLE_H_

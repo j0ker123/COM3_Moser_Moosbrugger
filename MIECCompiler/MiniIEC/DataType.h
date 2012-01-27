@@ -1,21 +1,20 @@
 #ifndef DATATYPE_H_
 #define DATATYPE_H_
 
+#include "Symbol.h"
+
 namespace MIEC {
 
-class DataType
+class DataType : public Symbol
 {
 public:
-	DataType(size_t const size)
-		: mSize(size) { }
-	size_t const GetSize() { return mSize; }
+	DataType(wchar_t* const name, size_t const size);
+	virtual ~DataType();
 
-protected:
-	DataType() { mSize = 0; }
-	void SetSize(size_t const size) { mSize = size; }
+	size_t const GetSize();
 
 private:
-	size_t mSize;
+	size_t const mSize;
 };
 
 class BaseType : public DataType
@@ -23,25 +22,27 @@ class BaseType : public DataType
 public:
 	enum eKind { eInt };
 
-	BaseType(eKind const kind)
-		: DataType(), mKind(kind)
-	{
-		switch (kind)
-		{
-		case eInt:
-			DataType::SetSize(2); break;
-		default:
-			break;
-		}
-	}
-	~BaseType() { }
+	virtual ~BaseType();
 
+	eKind const GetKind() const;
+
+protected:
+	BaseType(eKind const kind, wchar_t* const name, size_t const size);
+	
 private:
 	BaseType();
 
 	eKind const mKind;
 };
 
+class Integer : public BaseType
+{
+public:
+	Integer();
+
+private:
+};
+
 } // namespace MIEC
 
-#endif // DATATYPE_H
+#endif // DATATYPE_H_

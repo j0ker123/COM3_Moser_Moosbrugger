@@ -1,4 +1,3 @@
-
 #include <assert.h>
 #include "Parser.h"
 #include "DACGenerator.h"
@@ -8,23 +7,31 @@ namespace MIEC {
 DACGenerator::DACGenerator(Parser* const pParser)
 	: mpParser(pParser), mpDACList(new tDACList), mpCurrLabel(0), mLabelNumber(0) 
 {
+	assert(mpParser != 0);
+	assert(mpDACList != 0);
 }
 
 DACGenerator::~DACGenerator()
 {
-	// don't delete twice! - already done in SymbolTable destructor
-	//tDACList::iterator itor = mpDACList->begin();
-	//for (; itor != mDACList->end(); itor++) {
-	//	delete *itor;
-	//}
+	// Don't delete twice!
+	// DACSymbols (all added to SymbolTable) will be deleted by SymbolTable destructor.
+	/*
+	tDACList::iterator itor = mpDACList->begin();
+	for (; itor != mDACList->end(); itor++) {
+		delete *itor;
+	}
+	*/
 	delete mpDACList;
 }
 
 wchar_t* CreateString(wchar_t* prefix, size_t number)
 {
-	wchar_t* pName = new wchar_t[30];
+	// get destination string length
+	size_t const strLength = swprintf(0, 0, L"%s%d", prefix, number) + 1;
+	wchar_t* pName = new wchar_t[strLength];
 
-	swprintf(pName, L"%s%d", prefix, number);
+	// create string by concatenating prefix and number 
+	swprintf(pName, strLength, L"%s%d", prefix, number);
 
 	return pName;
 }
@@ -34,18 +41,23 @@ DACLabel* const DACGenerator::GetNewLabel()
 	DataType* pType = 0; //UnknownType;
 	wchar_t* pName = CreateString(L"$L", mLabelNumber++);
 
-	return new DACLabel(pType, pName, /* TODO: address of label in bytecode */ 0);
+	// create new DACLabel symbol
+	DACLabel* const pLabel = new DACLabel(pType, pName);
+
+	coco_string_delete(pName);
+	return pLabel;
 }
 
 DACLabel* const DACGenerator::AddLabel(DACLabel* pLabel)
 {
 	if (pLabel == 0) { return 0; }
 
-	// don't override registered label
+	// register label - don't override registered label
 	if (mpCurrLabel == 0) {
 		mpCurrLabel = pLabel;
 	}
 
+	// return registered label
 	return mpCurrLabel;
 }
 
@@ -82,8 +94,7 @@ DACSymbol* const DACGenerator::AddStat(DACSymbol::OpKind op, Symbol* pArg1, Symb
 				default:
 					mpParser->Err(L"AddStat: invalid left parameter");
 			}
-			err++;
-			//return 0;
+			err++;	// count error
 		}
 		else { 
 			pDataType = pArg1->GetDataType();
@@ -109,15 +120,21 @@ DACSymbol* const DACGenerator::AddStat(DACSymbol::OpKind op, Symbol* pArg1, Symb
 				if (pArg2 != 0) { mpParser->Err(L"AddStat: too much parameters"); err++; }
 		}
 
-		if (err > 0) { return 0; }
+		if (err > 0) { return 0; }	// don't create DAC with errors
 	}
 
+	// get temporary variable name for DAC result
 	wchar_t* pName = CreateString(L"$t", mpDACList->size());
 
+	// create new DACSymbol and link DACLabel (if one is registered)
 	DACSymbol* stat = new DACSymbol(pDataType, pName, op, pArg1, pArg2, mpCurrLabel);
+	// add new DACSymbol to DACList
 	mpDACList->push_back(stat);
 
+	// registered DACLabel now linked with new DACSymbol -> unregister
 	mpCurrLabel = 0;
+
+	coco_string_delete(pName);
 	return stat;
 }
 
@@ -126,4 +143,4 @@ tDACList const*const DACGenerator::GetDACList() const
 	return mpDACList;
 }
 
-} // MIEC
+} // namespace MIEC

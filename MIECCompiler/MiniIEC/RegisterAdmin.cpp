@@ -1,4 +1,3 @@
-
 #include <assert.h>
 #include "RegisterAdmin.h"
 
@@ -7,6 +6,7 @@ namespace MIEC {
 RegisterAdmin::RegisterAdmin(CodeGenProl16* const pProl16Gen, const size_t nrRegs)
 	: mpProl16Gen(pProl16Gen), mNrRegisters(nrRegs)
 {
+	assert(pProl16Gen != 0);
 }
 
 RegisterAdmin::~RegisterAdmin()
@@ -29,19 +29,26 @@ const size_t RegisterAdmin::GetRegister()
 
 const size_t RegisterAdmin::GetRegister(const Symbol* const pSym)
 {
-	assert(pSym != 0);
-	
-	if (pSym != 0 && mRegList.size() > 0) {
+	assert(mpProl16Gen != 0);
 
+	if (pSym == 0) {
+		// return unused register
+		return GetRegister();
+	}
+	
+	if (mRegList.size() > 0) {
 		// search register assigned to pSym
 		tRegList::const_iterator itor = mRegList.begin();
 		for (; itor != mRegList.end(); itor++) {
-			if (itor->second == pSym) { return itor->first; }
+			if (itor->second == pSym) {
+				// return assigned register
+				return itor->first;
+			}
 		}
 	}
 
 	// if not found allocate new (unused) register and load value
-	size_t addrRegNr = -1;
+	size_t addrRegNr = 0;
 	size_t regNr = GetRegister();
 	switch (pSym->GetType()) {
 		case Symbol::eConst:
@@ -59,6 +66,7 @@ const size_t RegisterAdmin::GetRegister(const Symbol* const pSym)
 			assert(false);
 			break;
 	}
+	// assign register
 	AssignRegister(regNr, pSym);
 	return regNr;
 }

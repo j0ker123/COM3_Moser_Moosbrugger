@@ -1,16 +1,20 @@
-
+#include <assert.h>
 #include "Parser.h"
 #include "SymbolTable.h"
 
 namespace MIEC {
 
 SymbolTable::SymbolTable(Parser* const pParser)
-	: mpParser(pParser) { }
+	: mpParser(pParser) 
+{
+	assert(mpParser != 0);
+}
 
 SymbolTable::~SymbolTable()
 {
 	tSymbolList::iterator itor = mSymbolList.begin();
 	for (; itor != mSymbolList.end(); itor++) {
+		// delete symbol
 		delete itor->second;
 	}
 	mSymbolList.clear();
@@ -18,7 +22,9 @@ SymbolTable::~SymbolTable()
 
 Symbol* const SymbolTable::AddSymbol(Symbol* pSymbol)
 {
-	if (pSymbol == 0) { 
+	assert(mpParser != 0);
+
+	if (pSymbol == 0) {
 		//mpParser->Err(L"AddSymbol: invalid symbol"); 
 		return 0;
 	}
@@ -32,16 +38,19 @@ Symbol* const SymbolTable::AddSymbol(Symbol* pSymbol)
 	if (ret.second == false)
 	{
 		//mpParser->Err(L"AddSymbol: symbol already defined");
-
-		//delete pSymbol;
-		//pSymbol = ret.first->second;
+		if (ret.first->second != pSymbol) {
+			delete pSymbol;
+			pSymbol = ret.first->second;
+		}
 	}
 		
-	return ret.first->second;
+	return pSymbol;
 }
 
 Symbol* const SymbolTable::FindSymbol(wchar_t* const pName) 
 {
+	assert(mpParser != 0);
+
 	if (pName == 0 || pName == L"") { 
 		mpParser->Err(L"FindSymbol: invalid symbol name");
 		return 0; 
@@ -56,4 +65,4 @@ Symbol* const SymbolTable::FindSymbol(wchar_t* const pName)
 	return ret->second;
 }
 
-} // MIEC
+} // namespace MIEC

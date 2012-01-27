@@ -1,11 +1,10 @@
 
 #include <wchar.h>
+#include "DataType.h"
 #include "SymbolTable.h"
 #include "DACGenerator.h"
 
 COMPILER MIEC
-
-	BaseType* mInteger;
 
 	SymbolTable* pList;
 	DACGenerator* pDACGen;
@@ -23,7 +22,6 @@ CHARACTERS
 TOKENS
 	ident  = letter {letter | digit}.
 	number = digit {digit}.
-  
     
 COMMENTS
 	FROM "(*" TO "*)" NESTED
@@ -40,10 +38,10 @@ MIEC
 	  "END"								(. pList->AddSymbol(pDACGen->AddStat(DACSymbol::eExit, 0, 0)); .)
 	.
 
-VarDecl									(. mInteger = new BaseType(BaseType::eInt); .)
-	= "BEGIN_VAR"						(. wchar_t* name; BaseType* type; size_t addr = 0; .)
-	  Ident<name> ":" Type<type> ";"	(. pList->AddSymbol(new VarSym(type, name, addr)); addr += type->GetSize(); .)
-	{ Ident<name> ":" Type<type> ";"	(. if (!(pList->FindSymbol(name))) {pList->AddSymbol(new VarSym(type, name, addr)); addr += type->GetSize();} else Err(L"VarDecl: ident already defined"); .)
+VarDecl
+	= "BEGIN_VAR"						(. wchar_t* pName; DataType* pType; size_t addr = 0; .)
+	  Ident<pName> ":" Type<pType> ";"	(. pList->AddSymbol(new VarSym(pType, pName, addr)); addr += pType->GetSize(); .)
+	{ Ident<pName> ":" Type<pType> ";"	(. if (!(pList->FindSymbol(pName))) {pList->AddSymbol(new VarSym(pType, pName, addr)); addr += pType->GetSize();} else Err(L"VarDecl: ident already defined"); .)
 	}
 	  "END_VAR"
 	.
@@ -60,29 +58,29 @@ Stat									(. Symbol* pSym = 0; .)
 	| Print<pSym>
 	.
 
-Assignment<Symbol* &pSym>				(. wchar_t* name; Symbol* pSym1 = 0; .)
-	= Ident<name>						(. pSym = pList->FindSymbol(name); if (!pSym) Err(L"Assignment: undefined ident"); .)
+Assignment<Symbol* &pSym>				(. wchar_t* pName; Symbol* pSym1 = 0; .)
+	= Ident<pName>						(. pSym = pList->FindSymbol(pName); if (!pSym) Err(L"Assignment: undefined ident"); .)
 	  ":=" 
 	  Expr<pSym1> ";"					(. pSym = pList->AddSymbol(pDACGen->AddStat(DACSymbol::eAssign, pSym, pSym1)); .)
 	.
 
-Branch<Symbol* &pSym>					(. DACLabel* pLblElse = pDACGen->GetNewLabel(); DACLabel* pLblNext = pDACGen->GetNewLabel(); .)
+Branch<Symbol* &pSym>					(. DACLabel* pLblElse = (DACLabel*)(pList->AddSymbol(pDACGen->GetNewLabel())); DACLabel* pLblNext = (DACLabel*)(pList->AddSymbol(pDACGen->GetNewLabel())); .)
 	= "IF"								
 	  Condition<pSym>
 	  "THEN"							(. pList->AddSymbol(pDACGen->AddStat(DACSymbol::eIfFalseJump, pSym, pLblElse)); .)
 	  Statements						
-	  [ "ELSE"							(. pList->AddSymbol(pDACGen->AddStat(DACSymbol::eJump, pLblNext, 0)); pList->AddSymbol(pDACGen->AddLabel(pLblElse)); .)	                                       
-	    Statements						(. pList->AddSymbol(pDACGen->AddLabel(pLblNext)); .)
+	  [ "ELSE"							(. pList->AddSymbol(pDACGen->AddStat(DACSymbol::eJump, pLblNext, 0)); pDACGen->AddLabel(pLblElse); .)	                                       
+	    Statements						(. pDACGen->AddLabel(pLblNext); .)
 	  ] 
 	  "END"								(. pDACGen->AddLabel(pLblElse); .)
 	.
 
-Loop<Symbol* &pSym>						(. DACLabel* pLblCond = pDACGen->GetNewLabel(); DACLabel* pLblNext = pDACGen->GetNewLabel(); .)
-	= "WHILE"							(. pList->AddSymbol(pDACGen->AddLabel(pLblCond)); .)
+Loop<Symbol* &pSym>						(. DACLabel* pLblCond = (DACLabel*)(pList->AddSymbol(pDACGen->GetNewLabel())); DACLabel* pLblNext = (DACLabel*)(pList->AddSymbol(pDACGen->GetNewLabel())); .)
+	= "WHILE"							(. pDACGen->AddLabel(pLblCond); .)
 	  Condition<pSym>
 	  "DO"								(. pList->AddSymbol(pDACGen->AddStat(DACSymbol::eIfFalseJump, pSym, pLblNext)); .)
 	  Statements						(. pList->AddSymbol(pDACGen->AddStat(DACSymbol::eJump, pLblCond, 0)); .)
-	  "END"								(. pList->AddSymbol(pDACGen->AddLabel(pLblNext)); .)
+	  "END"								(. pDACGen->AddLabel(pLblNext); .)
 	.
 
 Print<Symbol* &pSym>
@@ -90,7 +88,9 @@ Print<Symbol* &pSym>
 	.
 
 Condition<Symbol* &pSym>				(. DACSymbol::OpKind op = DACSymbol::eUnknown; Symbol* pSym1 = 0; .)
-	= Expr<pSym> Relop<op> Expr<pSym1>	(. pSym = pList->AddSymbol(pDACGen->AddStat(op, pSym, pSym1)); .)
+	= Expr<pSym>
+	  Relop<op>
+	  Expr<pSym1>						(. pSym = pList->AddSymbol(pDACGen->AddStat(op, pSym, pSym1)); .)
 	.
 
 Expr<Symbol* &pSym>						(. DACSymbol::OpKind op = DACSymbol::eUnknown; Symbol* pSym1 = 0; .)
@@ -111,9 +111,9 @@ Term<Symbol* &pSym>						(. DACSymbol::OpKind op = DACSymbol::eUnknown; Symbol* 
 	}
 	.
 
-Fact<Symbol* &pSym>						(. wchar_t* name; int val; .)
-	= Ident<name>						(. pSym = pList->FindSymbol(name); if (!pSym) Err(L"Fact: undefined ident"); .)
-	| Number<name, val>					(. pSym = pList->AddSymbol(new ConstSym(mInteger, name, val)); .)
+Fact<Symbol* &pSym>						(. wchar_t* pName; int val; .)
+	= Ident<pName>						(. pSym = pList->FindSymbol(pName); if (!pSym) Err(L"Fact: undefined ident"); .)
+	| Number<pName, val>				(. pSym = pList->AddSymbol(new ConstSym((DataType*)(pList->AddSymbol(new Integer())), pName, val)); .)
 	| "(" Expr<pSym> ")"
 	.
 
@@ -126,16 +126,16 @@ Relop<DACSymbol::OpKind &op>
 	| ">"								(. op = DACSymbol::eIsGreater; .)
 	.
 
-Type<BaseType* &type>
-	= "Integer"							(. type = mInteger; .)
+Type<DataType* &pType>
+	= "Integer"							(. pType = (DataType*)(pList->AddSymbol(new Integer())); .)
 	.
 
-Ident<wchar_t* &name>
-	= ident								(. name = t->val; .)
+Ident<wchar_t* &pName>
+	= ident								(. pName = t->val; .)
 	.
 
-Number<wchar_t* &name, int &val>
-	= number							(. name = t->val; swscanf(t->val, L"%d", &val); .)
+Number<wchar_t* &pName, int &val>
+	= number							(. pName = t->val; swscanf(t->val, L"%d", &val); .)
 	.
 
 END MIEC .

@@ -1,27 +1,27 @@
 #ifndef SYMBOL_H_
 #define SYMBOL_H_
 
-#include "DataType.h"
-#include "Scanner.h"
-
 namespace MIEC {
+
+class DataType;
 
 class Symbol
 {
 public:
-	virtual ~Symbol() { coco_string_delete(mName); }
+	virtual ~Symbol();
 
-	typedef enum { eConst, eVar, eTempVar, eLabel } tSymbolType;
-	tSymbolType const GetType() const { return mType; }
-	wchar_t* const GetName() const { return mName; }
-	DataType* const GetDataType() const { return mpDataType; }
+	typedef enum { eType, eConst, eVar, eTempVar, eLabel } tSymbolType;
+	tSymbolType const GetType() const;
+	wchar_t* const GetName() const;
+	DataType* const GetDataType() const;
 
 protected:
-	Symbol(tSymbolType const symbolType, wchar_t* const symbolName, DataType* const pDataType)
-		: mType(symbolType), mName(coco_string_create(symbolName)), mpDataType(pDataType) { }
+	Symbol(tSymbolType const symbolType, wchar_t* const symbolName, DataType* const pDataType);
 
 private:
 	Symbol();
+	Symbol(const Symbol&);
+	Symbol& operator= (const Symbol&);
 
 	tSymbolType const mType;
 	wchar_t* mName;
@@ -31,27 +31,33 @@ private:
 class ConstSym : public Symbol
 {
 public:
-	ConstSym(DataType* const pDataType, wchar_t* const name, int const val)
-		: Symbol(Symbol::eConst, name, pDataType), mVal(val) { }
+	ConstSym(DataType* const pDataType, wchar_t* const name, int const val);
 
-	int GetVal() const { return mVal; }
+	int GetVal() const;
 
 private:
+	ConstSym();
+	ConstSym(const ConstSym&);
+	ConstSym& operator= (const ConstSym&);
+
 	int const mVal;
 };
 
 class VarSym : public Symbol
 {
 public:
-	VarSym(DataType* const pDataType, wchar_t* const name, size_t const addr)
-		: Symbol(Symbol::eVar, name, pDataType), mAddr(addr) { }
+	VarSym(DataType* const pDataType, wchar_t* const name, size_t const addr);
 
-	int GetAddr() const { return mAddr; }
+	int GetAddr() const;
 
 private:
+	VarSym();
+	VarSym(const VarSym&);
+	VarSym& operator= (const VarSym&);
+
 	size_t const mAddr;
 };
 
-}
+} // namespace MIEC
 
-#endif // SYMBOL_H_
+#endif // #ifndef SYMBOL_H_

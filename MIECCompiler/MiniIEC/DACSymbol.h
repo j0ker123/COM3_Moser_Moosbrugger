@@ -8,13 +8,13 @@ namespace MIEC {
 class DACLabel : public Symbol
 {
 public:
-	DACLabel(DataType* pDataType, wchar_t* name, size_t addr)
-		: Symbol(Symbol::eLabel, name, pDataType), mAddr(addr) { }
+	DACLabel(DataType* pDataType, wchar_t* name);
 
-	int const GetAddr() const { return mAddr; }
+	size_t const GetAddr() const;
+	void SetAddr(size_t const addr);
 
 private:
-	size_t const mAddr;
+	size_t mAddr;
 };
 
 class DACSymbol : public Symbol
@@ -26,13 +26,12 @@ public:
 		eJump, eIfJump, eIfFalseJump, 
 		eAssign, ePrint, eExit };
 
-	DACSymbol(DataType* pDataType, wchar_t* name, OpKind operation, Symbol* pArg1, Symbol* pArg2, DACLabel* pLabel)
-		: Symbol(Symbol::eTempVar, name, pDataType), mOperation(operation), mpArg1(pArg1), mpArg2(pArg2), mpLabel(pLabel) {}
+	DACSymbol(DataType* pDataType, wchar_t* name, OpKind operation, Symbol* pArg1, Symbol* pArg2, DACLabel* pLabel);
 
-	DACLabel* const GetLabel() const { return mpLabel; }
-	OpKind const GetOperation() const { return mOperation; }
-	Symbol* const GetArgument1() const { return mpArg1; }
-	Symbol* const GetArgument2() const { return mpArg2; }
+	DACLabel* const GetLabel() const;
+	OpKind const GetOperation() const;
+	Symbol* const GetArgument1() const;
+	Symbol* const GetArgument2() const;
 
 private:
 	DACLabel* const mpLabel;
@@ -41,6 +40,6 @@ private:
 	Symbol* const mpArg2;
 };
 
-} // MIEC
+} // namespace MIEC
 
-#endif // DACSYMBOL_H_
+#endif // #ifndef DACSYMBOL_H_
