@@ -81,6 +81,7 @@ DACSymbol* const DACGenerator::AddStat(DACSymbol::OpKind const op, Symbol* const
 		err++;	// count error
 	}
 	else if (op == DACSymbol::eExit) {
+		pDataType = this->AddType(new Void());	// set DataType of DAC result
 	}
 	else {
 		if (pArg1 == 0) {
@@ -109,6 +110,7 @@ DACSymbol* const DACGenerator::AddStat(DACSymbol::OpKind const op, Symbol* const
 		switch (op) {
 			case DACSymbol::eAssign:
 				if (pArg2 == 0) { mpParser->Err(L"AddStat: invalid assignment source"); err++; break; }
+				if (pDataType != pArg2->GetDataType()) { mpParser->Err(L"AddStat: incompatible types"); err++; break; }
 				break;
 			case DACSymbol::eAdd: case DACSymbol::eSubtract: case DACSymbol::eMultiply: case DACSymbol::eDivide:
 				if (pArg2 == 0) { mpParser->Err(L"AddStat: invalid right parameter"); err++; break; }
@@ -116,14 +118,16 @@ DACSymbol* const DACGenerator::AddStat(DACSymbol::OpKind const op, Symbol* const
 				break;
 			case DACSymbol::eIsEqual: case DACSymbol::eIsNotEqual: case DACSymbol::eIsLessEqual: case DACSymbol::eIsGreaterEqual: case DACSymbol::eIsLess: case DACSymbol::eIsGreater:
 				if (pArg2 == 0) { mpParser->Err(L"AddStat: invalid right parameter"); err++; break; }
-				// TODO: pDataType = boolean;
+				pDataType = this->AddType(new Boolean());	// set DataType of DAC result
 				break;
 			case DACSymbol::eIfJump: case DACSymbol::eIfFalseJump:
-				// TODO: if (pDataType != boolean) { mpParser->Err(L"AddStat: invalid condition"); err++; break; }
+				if (pDataType != this->AddType(new Boolean())) { mpParser->Err(L"AddStat: invalid condition (Boolean expected)"); err++; break; }
 				if (pArg2 == 0) { mpParser->Err(L"AddStat: invalid jump destination"); err++; break; }
+				pDataType = this->AddType(new Void());	// set DataType of DAC result
 				break;
 			default:
 				if (pArg2 != 0) { mpParser->Err(L"AddStat: too much parameters"); err++; break; }
+				pDataType = this->AddType(new Void());	// set DataType of DAC result
 		}
 	}
 

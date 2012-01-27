@@ -9,6 +9,5 @@ BEGIN
 			print(i);
 		END
 		i := i + 1;
-		print(i);
 	END
 END

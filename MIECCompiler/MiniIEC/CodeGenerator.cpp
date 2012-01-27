@@ -53,21 +53,21 @@ void CodeGenerator::GenerateCode(const std::wstring& arFileName)
 		// create program code depending on kind of operation
 		switch (op) {
 		case DACSymbol::eAdd:
-			OperationAdd(pSym, mpGenProl16->GetCodePosition()); break;
+			OperationAdd(pSym); break;
 		case DACSymbol::eSubtract:
-			OperationSubtract(pSym, mpGenProl16->GetCodePosition()); break;
+			OperationSubtract(pSym); break;
 		case DACSymbol::eMultiply:
 			OperationMultiply(pSym); break;
 		case DACSymbol::eDivide:
 			OperationDivide(pSym); break;
 		case DACSymbol::eAssign:
-			OperationAssign(pSym, mpGenProl16->GetCodePosition()); break;
+			OperationAssign(pSym); break;
 		case DACSymbol::eJump:
 			OperationJump(pSym, jumpLblList); break;
 		case DACSymbol::eIfJump: case DACSymbol::eIfFalseJump:
-			OperationConditionalJump(pSym, jumpLblList, mpGenProl16->GetCodePosition()); break;
+			OperationConditionalJump(pSym, jumpLblList); break;
 		case DACSymbol::ePrint:
-			OperationPrint(pSym, mpGenProl16->GetCodePosition()); break;
+			OperationPrint(pSym); break;
 		case DACSymbol::eExit:
 			mpGenProl16->Sleep();
 		default:
@@ -88,7 +88,7 @@ void CodeGenerator::GenerateCode(const std::wstring& arFileName)
 // result += addend2
 //
 ////////////////////////////////////////////////////////////////////////////
-void CodeGenerator::OperationAdd(DACSymbol* apDacSym, tDACPosition aDacPos)
+void CodeGenerator::OperationAdd(DACSymbol* apDacSym)
 {
 	tRegNr regA = mpRegAdmin->GetRegister(apDacSym->GetArgument1());	// addend1
 	tRegNr regB = mpRegAdmin->GetRegister(apDacSym->GetArgument2());	// addend2
@@ -112,7 +112,7 @@ void CodeGenerator::OperationAdd(DACSymbol* apDacSym, tDACPosition aDacPos)
 // result -= subtrahend
 //
 ////////////////////////////////////////////////////////////////////////////
-void CodeGenerator::OperationSubtract(DACSymbol* apDacSym, tDACPosition aDacPos)
+void CodeGenerator::OperationSubtract(DACSymbol* apDacSym)
 {
 	tRegNr regA = mpRegAdmin->GetRegister(apDacSym->GetArgument1());	// minuend
 	tRegNr regB = mpRegAdmin->GetRegister(apDacSym->GetArgument2());	// subtrahend
@@ -249,7 +249,7 @@ void CodeGenerator::OperationDivide(DACSymbol* apDacSym)
 // result = source
 //
 ////////////////////////////////////////////////////////////////////////////
-void CodeGenerator::OperationAssign(DACSymbol* apDacSym, tDACPosition aDacPos)
+void CodeGenerator::OperationAssign(DACSymbol* apDacSym)
 {
 	tRegNr regA = mpRegAdmin->GetRegister(apDacSym->GetArgument2());	// source
 	tRegNr regB = mpRegAdmin->GetRegister();	// destination address
@@ -259,7 +259,8 @@ void CodeGenerator::OperationAssign(DACSymbol* apDacSym, tDACPosition aDacPos)
 	mpGenProl16->Store(regA, regB);
 
 	// assign result register to DAC-Symbol
-	mpRegAdmin->AssignRegister(regA, pDestination);
+	//mpRegAdmin->AssignRegister(regA, pDestination);
+	mpRegAdmin->FreeRegister(regA);
 
 	// free all other registers
 	mpRegAdmin->FreeRegister(regB);
@@ -298,7 +299,7 @@ void CodeGenerator::OperationJump(DACSymbol* apDacSym, tJumpLblList& arUnresolve
 // 
 //
 ////////////////////////////////////////////////////////////////////////////
-void CodeGenerator::OperationConditionalJump(DACSymbol* apDacSym, tJumpLblList& arUnresolvedJumps, tDACPosition aDacPos)
+void CodeGenerator::OperationConditionalJump(DACSymbol* apDacSym, tJumpLblList& arUnresolvedJumps)
 {
 	DACSymbol* const pBranchCond = (DACSymbol*)(apDacSym->GetArgument1());
 	tRegNr regA = mpRegAdmin->GetRegister(pBranchCond->GetArgument1());
@@ -377,7 +378,7 @@ void CodeGenerator::OperationConditionalJump(DACSymbol* apDacSym, tJumpLblList& 
 // 
 //
 ////////////////////////////////////////////////////////////////////////////
-void CodeGenerator::OperationPrint(DACSymbol* apDacSym, tDACPosition aDacPos) 
+void CodeGenerator::OperationPrint(DACSymbol* apDacSym) 
 {
 	tRegNr regA = mpRegAdmin->GetRegister(apDacSym->GetArgument1());	// source
 	

@@ -20,7 +20,7 @@ private:
 class BaseType : public DataType
 {
 public:
-	enum eKind { eInt };
+	enum eKind { eVoid, eBool, eInt };
 
 	virtual ~BaseType();
 
@@ -33,6 +33,22 @@ private:
 	BaseType();
 
 	eKind const mKind;
+};
+
+class Void : public BaseType
+{
+public:
+	Void();
+
+private:
+};
+
+class Boolean : public BaseType
+{
+public:
+	Boolean();
+
+private:
 };
 
 class Integer : public BaseType

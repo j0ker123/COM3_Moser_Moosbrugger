@@ -26,14 +26,14 @@ private:
 	typedef std::pair<DACLabel*, WORD> tJumpLblEntry;
 	typedef std::map<DACLabel*, WORD> tJumpLblList;
 
-	void OperationAdd(DACSymbol* apDacSym, tDACPosition aDacPos);
-	void OperationSubtract(DACSymbol* apDacSym, tDACPosition aDacPos);
+	void OperationAdd(DACSymbol* apDacSym);
+	void OperationSubtract(DACSymbol* apDacSym);
 	void OperationMultiply(DACSymbol* apDacSym);
 	void OperationDivide(DACSymbol* apDacSym);
-	void OperationAssign(DACSymbol* apDacSym, tDACPosition aDacPos);
+	void OperationAssign(DACSymbol* apDacSym);
 	void OperationJump(DACSymbol* apDacSym , tJumpLblList& arUnresolvedJumps);
-	void OperationConditionalJump(DACSymbol* apDacSym, tJumpLblList& arUnresolvedJumps, tDACPosition aDacPos);
-	void OperationPrint(DACSymbol* apDacSym, tDACPosition aDacPos);
+	void OperationConditionalJump(DACSymbol* apDacSym, tJumpLblList& arUnresolvedJumps);
+	void OperationPrint(DACSymbol* apDacSym);
 
 	//private members
 	const tDACList* const mpDacList;

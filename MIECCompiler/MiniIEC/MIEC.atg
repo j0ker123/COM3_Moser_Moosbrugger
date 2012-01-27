@@ -132,7 +132,7 @@ Ident<wchar_t* &pName>
 	.
 
 Number<wchar_t* &pName, double &val>
-	= number							(. pName = t->val; swscanf(t->val, L"%d", &val); .)
+	= number							(. pName = t->val; swscanf(t->val, L"%Lf", &val); .)
 	.
 
 END MIEC .
