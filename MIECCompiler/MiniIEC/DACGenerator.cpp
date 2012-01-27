@@ -84,29 +84,33 @@ DACSymbol* const DACGenerator::AddStat(DACSymbol::OpKind const op, Symbol* const
 		pDataType = this->AddType(new Void());	// set DataType of DAC result
 	}
 	else {
-		if (pArg1 == 0) {
-			switch (op) {
-				case DACSymbol::eAssign:
-					mpParser->Err(L"AddStat: invalid assignment destination");
-					break;
-				case DACSymbol::ePrint:
-					mpParser->Err(L"AddStat: invalid parameter");
-					break;
-				case DACSymbol::eIfJump: case DACSymbol::eIfFalseJump:
-					mpParser->Err(L"AddStat: invalid branch condition");
-					break;
-				case DACSymbol::eJump:
-					mpParser->Err(L"AddStat: invalid jump destination");
-					break;
-				default:
-					mpParser->Err(L"AddStat: invalid left parameter");
-			}
-			err++;	// count error
-		}
-		else { 
-			pDataType = pArg1->GetDataType();	// set DataType of DAC result
+		// check left parameter...
+		switch (op) {
+			case DACSymbol::eAssign:
+				if (pArg1 == 0) { mpParser->Err(L"AddStat: invalid assignment destination"); err++; break; }
+				if (pArg1->GetType() != Symbol::eVar) { mpParser->Err(L"AddStat: invalid assignment destination (Variable expected)"); err++; break; }
+				pDataType = pArg1->GetDataType();	// set DataType of DAC result
+				break;
+			case DACSymbol::ePrint:
+				if (pArg1 == 0) { mpParser->Err(L"AddStat: invalid parameter"); err++; break; }
+				pDataType = this->AddType(new Void());	// set DataType of DAC result
+				break;
+			case DACSymbol::eIfJump: case DACSymbol::eIfFalseJump:
+				if (pArg1 == 0) { mpParser->Err(L"AddStat: invalid branch condition"); err++; break; }
+				if (pArg1->GetDataType() != this->AddType(new Boolean())) { mpParser->Err(L"AddStat: invalid condition (Boolean expected)"); err++; break; }
+				pDataType = this->AddType(new Void());	// set DataType of DAC result
+				break;
+			case DACSymbol::eJump:
+				if (pArg1 == 0) { mpParser->Err(L"AddStat: invalid jump destination"); err++; break; }
+				if (pArg1->GetType() != Symbol::eLabel) { mpParser->Err(L"AddStat: invalid jump destination (Label expected)"); err++; break; }
+				pDataType = this->AddType(new Void());	// set DataType of DAC result
+				break;
+			default:
+				if (pArg1 == 0) { mpParser->Err(L"AddStat: invalid left parameter"); err++; break; }
+				pDataType = pArg1->GetDataType();	// set DataType of DAC result
 		}
 
+		// check right parameter...
 		switch (op) {
 			case DACSymbol::eAssign:
 				if (pArg2 == 0) { mpParser->Err(L"AddStat: invalid assignment source"); err++; break; }
@@ -121,13 +125,12 @@ DACSymbol* const DACGenerator::AddStat(DACSymbol::OpKind const op, Symbol* const
 				pDataType = this->AddType(new Boolean());	// set DataType of DAC result
 				break;
 			case DACSymbol::eIfJump: case DACSymbol::eIfFalseJump:
-				if (pDataType != this->AddType(new Boolean())) { mpParser->Err(L"AddStat: invalid condition (Boolean expected)"); err++; break; }
 				if (pArg2 == 0) { mpParser->Err(L"AddStat: invalid jump destination"); err++; break; }
-				pDataType = this->AddType(new Void());	// set DataType of DAC result
+				if (pArg2->GetType() != Symbol::eLabel) { mpParser->Err(L"AddStat: invalid jump destination (Label expected)"); err++; break; }
 				break;
 			default:
 				if (pArg2 != 0) { mpParser->Err(L"AddStat: too much parameters"); err++; break; }
-				pDataType = this->AddType(new Void());	// set DataType of DAC result
+				//pDataType = this->AddType(new Void());	// set DataType of DAC result
 		}
 	}
 
