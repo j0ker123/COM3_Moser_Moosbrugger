@@ -27,9 +27,12 @@ public:
 	DACSymbol* const AddStat(DACSymbol::OpKind const op, Symbol* const pArg1, Symbol* const pArg2);
 
 	Symbol* const FindSymbol(wchar_t* const pName);
+	Symbol* const GetSymbol(wchar_t* const pName);
 
 	const SymbolTable& GetSymbolList() const;
 	const tDACList& GetDACList() const;
+
+	void Err(wchar_t* const format, ...) const;
 	size_t const GetErrorCounter() const;
 
 private:

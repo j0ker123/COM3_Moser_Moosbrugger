@@ -6,10 +6,6 @@ COMPILER MIEC
 	
 	DACGenerator* pDACGen;
 
-	void Err(wchar_t* msg) {
-		errors->Error(la->line, la->col, msg);
-	}
-
 CHARACTERS
 	letter = 'A'..'Z' + 'a'..'z'.
 	digit = "0123456789".
@@ -38,7 +34,7 @@ MIEC
 VarDecl
 	= "BEGIN_VAR"						(. wchar_t* pName; DataType* pType; size_t addr = 0; .)
 	  Ident<pName> ":" Type<pType> ";"	(. pDACGen->AddSymbol(new VarSym(pType, pName, addr)); addr += pType->GetSize(); .)
-	{ Ident<pName> ":" Type<pType> ";"	(. if (!(pDACGen->FindSymbol(pName))) { pDACGen->AddSymbol(new VarSym(pType, pName, addr)); addr += pType->GetSize(); } else Err(L"VarDecl: ident already defined"); .)
+	{ Ident<pName> ":" Type<pType> ";"	(. pDACGen->AddSymbol(new VarSym(pType, pName, addr)); addr += pType->GetSize(); .)
 	}
 	  "END_VAR"
 	.
@@ -56,8 +52,8 @@ Stat									(. Symbol* pSym = 0; .)
 	.
 
 Assignment<Symbol* &pSym>				(. wchar_t* pName; Symbol* pSym1 = 0; .)
-	= Ident<pName>						(. pSym = pDACGen->FindSymbol(pName); if (!pSym) Err(L"Assignment: undefined ident"); .)
-	  ":=" 
+	= Ident<pName>						(. pSym = pDACGen->GetSymbol(pName); .)
+	  ":="
 	  Expr<pSym1> ";"					(. pSym = pDACGen->AddStat(DACSymbol::eAssign, pSym, pSym1); .)
 	.
 
@@ -109,7 +105,7 @@ Term<Symbol* &pSym>						(. DACSymbol::OpKind op = DACSymbol::eUnknown; Symbol* 
 	.
 
 Fact<Symbol* &pSym>						(. wchar_t* pName; double val; .)
-	= Ident<pName>						(. pSym = pDACGen->FindSymbol(pName); if (!pSym) Err(L"Fact: undefined ident"); .)
+	= Ident<pName>						(. pSym = pDACGen->GetSymbol(pName); .)
 	| Number<pName, val>				(. pSym = pDACGen->AddSymbol(new ConstSym(pDACGen->AddType(new Integer()), pName, val)); .)
 	| "(" Expr<pSym> ")"
 	.

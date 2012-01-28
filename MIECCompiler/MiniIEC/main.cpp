@@ -38,15 +38,19 @@ int main(int argc, char* argv[])
 			MIEC::Parser* pParser = new MIEC::Parser( pScanner );
 
 			pParser->Parse();
-			wcout << "Parse errors: " << pParser->errors->count << endl;
-			wcout << "DAC errors: " << pParser->pDACGen->GetErrorCounter() << endl;
+			size_t nrParseErrors = pParser->errors->count;
+			size_t nrDACErrors = pParser->pDACGen->GetErrorCounter();
+			wcout << "Parse errors: " << nrParseErrors << endl;
+			wcout << "DAC errors: " << nrDACErrors << endl;
 
-			coco_string_merge(fileName, L".iex");
-			size_t const cNrRegisters = 8;
-			MIEC::CodeGenerator codeGen(&(pParser->pDACGen->GetDACList()), cNrRegisters);
+			if (nrParseErrors + nrDACErrors == 0) {
+				size_t const cNrRegisters = 8;
+				coco_string_merge(fileName, L".iex");
+				MIEC::CodeGenerator codeGen(&(pParser->pDACGen->GetDACList()), cNrRegisters);
 
-			codeGen.GenerateCode(fileName);
-			wcout << "Code generated: " << fileName << endl;
+				codeGen.GenerateCode(fileName);
+				wcout << "Code generated: " << fileName << endl;
+			}
 
 			delete pParser->pDACGen; pParser->pDACGen = 0;
 			delete pParser; pParser = 0;

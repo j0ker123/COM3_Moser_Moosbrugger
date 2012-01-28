@@ -1,18 +1,15 @@
 #include <assert.h>
-#include "Parser.h"
 #include "SymbolTable.h"
 
 namespace MIEC {
 
-SymbolTable::SymbolTable(Parser* const pParser)
-	: mpParser(pParser) 
+SymbolTable::SymbolTable()
 {
-	assert(mpParser != 0);
 }
 
 SymbolTable::~SymbolTable()
 {
-	// for each entry in SymbolTable...
+	// for each entry in symbol table ...
 	tSymbolList::iterator itor = mSymbolList.begin();
 	for (; itor != mSymbolList.end(); itor++) {
 		// delete symbol
@@ -24,46 +21,38 @@ SymbolTable::~SymbolTable()
 
 Symbol* const SymbolTable::AddSymbol(Symbol* pSymbol)
 {
-	assert(mpParser != 0);
-
 	if (pSymbol == 0) {
-		//mpParser->Err(L"AddSymbol: invalid symbol"); 
-		return 0;
+		return 0;	// invalid symbol
 	}
 	wchar_t* pName = pSymbol->GetName();
 	if (pName == 0 || coco_string_equal(pName, L"")) {
-		mpParser->Err(L"AddSymbol: invalid symbol name");
-		return 0;
+		return 0;	// invalid symbol name
 	}
 
+	// insert symbol pSymbol to symbol table (if not already added)
 	std::pair<tSymbolList::iterator, bool> ret = mSymbolList.insert(tSymbolEntry(pName, pSymbol));
 	if (ret.second == false)
 	{
-		//mpParser->Err(L"AddSymbol: symbol already defined");
+		// symbol already added to symbol table
 		if (ret.first->second != pSymbol) {
 			delete pSymbol;
 			pSymbol = ret.first->second;
 		}
-	}
-		
+	}		
 	return pSymbol;
 }
 
 Symbol* const SymbolTable::FindSymbol(wchar_t* const pName) 
 {
-	assert(mpParser != 0);
-
 	if (pName == 0 || coco_string_equal(pName, L"")) { 
-		mpParser->Err(L"FindSymbol: invalid symbol name");
-		return 0; 
+		return 0;	// invalid symbol name
 	}
 
+	// search symbol with name pName in symbol table
 	tSymbolList::const_iterator ret = mSymbolList.find(pName);
-	if (ret == mSymbolList.end()) { 
-		//mpParser->Err(L"FindSymbol: undefined symbol");
-		return 0; 
+	if (ret == mSymbolList.end()) {
+		return 0;	// undefined symbol
 	}
-
 	return ret->second;
 }
 

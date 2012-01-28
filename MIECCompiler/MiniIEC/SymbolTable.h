@@ -8,8 +8,6 @@
 
 namespace MIEC {
 
-class Parser;
-
 class SymbolTable
 {
 public:
@@ -23,18 +21,16 @@ public:
 	typedef std::pair<wchar_t*, Symbol*> tSymbolEntry;
 	typedef std::map<wchar_t*, Symbol*, NameCompare> tSymbolList;
 
-	SymbolTable(Parser* const pParser);
+	SymbolTable();
 	virtual ~SymbolTable();
 
 	Symbol* const AddSymbol(Symbol* pSymbol);
 	Symbol* const FindSymbol(wchar_t* const pName);
 
 private:
-	SymbolTable();
 	SymbolTable(const SymbolTable&);
 	SymbolTable& operator= (const SymbolTable&);
 
-	Parser* const mpParser;
 	tSymbolList mSymbolList;
 };
 

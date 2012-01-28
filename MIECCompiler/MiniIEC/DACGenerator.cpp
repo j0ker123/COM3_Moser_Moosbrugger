@@ -1,11 +1,12 @@
 #include <assert.h>
+#include <stdarg.h>
 #include "Parser.h"
 #include "DACGenerator.h"
 
 namespace MIEC {
 
 DACGenerator::DACGenerator(Parser* const pParser)
-	: mpParser(pParser), mSymbolTable(pParser), mpCurrLabel(0), mLabelNumber(0), mErrorCounter(0)
+	: mpParser(pParser), mpCurrLabel(0), mLabelNumber(0), mErrorCounter(0)
 {
 	assert(mpParser != 0);
 }
@@ -29,7 +30,7 @@ wchar_t* CreateString(wchar_t* const prefix, size_t const number)
 	return pName;
 }
 
-DACLabel* const DACGenerator::GetNewLabel() 
+DACLabel* const DACGenerator::GetNewLabel()
 {
 	// get unique consecutive name for new DACLabel
 	wchar_t* pName = CreateString(L"$L", mLabelNumber++);
@@ -46,19 +47,56 @@ DACLabel* const DACGenerator::GetNewLabel()
 
 DataType* const DACGenerator::AddType(DataType* pType)
 {
+	assert(mpParser != 0);
+
+	if (pType == 0) {
+		this->Err(L"AddType: invalid datatype"); 
+		return 0;
+	}
+	wchar_t* pName = pType->GetName();
+	if (pName == 0 || coco_string_equal(pName, L"")) {
+		this->Err(L"AddType: invalid datatype name");
+		return 0;
+	}
+
 	// add DataType to SymbolTable
 	return (DataType*)(mSymbolTable.AddSymbol(pType));
 }
 
 Symbol* const DACGenerator::AddSymbol(Symbol* pSymbol)
 {
+	assert(mpParser != 0);
+
+	if (pSymbol == 0) {
+		this->Err(L"AddSymbol: invalid symbol"); 
+		return 0;
+	}
+	wchar_t* pName = pSymbol->GetName();
+	if (pName == 0 || coco_string_equal(pName, L"")) {
+		this->Err(L"AddSymbol: invalid symbol name");
+		return 0;
+	}
+	if (pSymbol->GetType() != Symbol::eConst && mSymbolTable.FindSymbol(pName)) {
+		this->Err(L"AddSymbol: symbol '%ls' already defined", pName);
+	}
+
 	// add Symbol to SymbolTable
 	return mSymbolTable.AddSymbol(pSymbol);
 }
 
 DACLabel* const DACGenerator::AddLabel(DACLabel* const pLabel)
 {
-	if (pLabel == 0) { return 0; }
+	assert(mpParser != 0);
+
+	if (pLabel == 0) {
+		this->Err(L"AddLabel: invalid label"); 
+		return 0;
+	}
+	wchar_t* pName = pLabel->GetName();
+	if (pName == 0 || coco_string_equal(pName, L"")) {
+		this->Err(L"AddLabel: invalid label name");
+		return 0;
+	}
 
 	// register label - don't override registered label
 	if (mpCurrLabel == 0) {
@@ -74,10 +112,10 @@ DACSymbol* const DACGenerator::AddStat(DACSymbol::OpKind const op, Symbol* const
 	assert(mpParser != 0);
 
 	size_t err = 0;				// local error counter
-	DataType* pDataType = 0;	// unknown or no DataType;
+	DataType* pDataType = 0;	// unknown DataType;
 
 	if (op == DACSymbol::eUnknown) {
-		mpParser->Err(L"AddStat: invalid operation");
+		this->Err(L"AddStat: invalid operation");
 		err++;	// count error
 	}
 	else if (op == DACSymbol::eExit) {
@@ -87,49 +125,48 @@ DACSymbol* const DACGenerator::AddStat(DACSymbol::OpKind const op, Symbol* const
 		// check left parameter...
 		switch (op) {
 			case DACSymbol::eAssign:
-				if (pArg1 == 0) { mpParser->Err(L"AddStat: invalid assignment destination"); err++; break; }
-				if (pArg1->GetType() != Symbol::eVar) { mpParser->Err(L"AddStat: invalid assignment destination (Variable expected)"); err++; break; }
+				if (pArg1 == 0) { this->Err(L"AddStat: invalid assignment destination"); err++; break; }
+				if (pArg1->GetType() != Symbol::eVar) { this->Err(L"AddStat: invalid assignment destination '%ls' (Variable expected)", pArg1->GetName()); err++; break; }
 				pDataType = pArg1->GetDataType();	// set DataType of DAC result
 				break;
 			case DACSymbol::ePrint:
-				if (pArg1 == 0) { mpParser->Err(L"AddStat: invalid parameter"); err++; break; }
+				if (pArg1 == 0) { this->Err(L"AddStat: invalid parameter"); err++; break; }
 				pDataType = this->AddType(new Void());	// set DataType of DAC result
 				break;
 			case DACSymbol::eIfJump: case DACSymbol::eIfFalseJump:
-				if (pArg1 == 0) { mpParser->Err(L"AddStat: invalid branch condition"); err++; break; }
-				if (pArg1->GetDataType() != this->AddType(new Boolean())) { mpParser->Err(L"AddStat: invalid condition (Boolean expected)"); err++; break; }
+				if (pArg1 == 0) { this->Err(L"AddStat: invalid branch condition"); err++; break; }
+				if (pArg1->GetDataType() != this->AddType(new Boolean())) { this->Err(L"AddStat: invalid condition (type Boolean expected)"); err++; break; }
 				pDataType = this->AddType(new Void());	// set DataType of DAC result
 				break;
 			case DACSymbol::eJump:
-				if (pArg1 == 0) { mpParser->Err(L"AddStat: invalid jump destination"); err++; break; }
-				if (pArg1->GetType() != Symbol::eLabel) { mpParser->Err(L"AddStat: invalid jump destination (Label expected)"); err++; break; }
+				if (pArg1 == 0) { this->Err(L"AddStat: invalid jump destination"); err++; break; }
+				if (pArg1->GetType() != Symbol::eLabel) { this->Err(L"AddStat: invalid jump destination (Label expected)"); err++; break; }
 				pDataType = this->AddType(new Void());	// set DataType of DAC result
 				break;
 			default:
-				if (pArg1 == 0) { mpParser->Err(L"AddStat: invalid left parameter"); err++; break; }
+				if (pArg1 == 0) { this->Err(L"AddStat: invalid left parameter"); err++; break; }
 				pDataType = pArg1->GetDataType();	// set DataType of DAC result
 		}
 
 		// check right parameter...
 		switch (op) {
 			case DACSymbol::eAssign:
-				if (pArg2 == 0) { mpParser->Err(L"AddStat: invalid assignment source"); err++; break; }
-				if (pDataType != pArg2->GetDataType()) { mpParser->Err(L"AddStat: incompatible types"); err++; break; }
-				break;
+				if (pArg2 == 0) { this->Err(L"AddStat: invalid assignment source"); err++; break; }
+				//break;	// continue to check datatypes
 			case DACSymbol::eAdd: case DACSymbol::eSubtract: case DACSymbol::eMultiply: case DACSymbol::eDivide:
-				if (pArg2 == 0) { mpParser->Err(L"AddStat: invalid right parameter"); err++; break; }
-				if (pDataType != pArg2->GetDataType()) { mpParser->Err(L"AddStat: incompatible types"); err++; break; }
+				if (pArg2 == 0) { this->Err(L"AddStat: invalid right parameter"); err++; break; }
+				if (pDataType && pDataType != pArg2->GetDataType()) { this->Err(L"AddStat: incompatible types (left is '%ls', right is '%ls')", pDataType->GetName(), pArg2->GetDataType()->GetName()); err++; break; }
 				break;
 			case DACSymbol::eIsEqual: case DACSymbol::eIsNotEqual: case DACSymbol::eIsLessEqual: case DACSymbol::eIsGreaterEqual: case DACSymbol::eIsLess: case DACSymbol::eIsGreater:
-				if (pArg2 == 0) { mpParser->Err(L"AddStat: invalid right parameter"); err++; break; }
+				if (pArg2 == 0) { this->Err(L"AddStat: invalid right parameter"); err++; break; }
 				pDataType = this->AddType(new Boolean());	// set DataType of DAC result
 				break;
 			case DACSymbol::eIfJump: case DACSymbol::eIfFalseJump:
-				if (pArg2 == 0) { mpParser->Err(L"AddStat: invalid jump destination"); err++; break; }
-				if (pArg2->GetType() != Symbol::eLabel) { mpParser->Err(L"AddStat: invalid jump destination (Label expected)"); err++; break; }
+				if (pArg2 == 0) { this->Err(L"AddStat: invalid jump destination"); err++; break; }
+				if (pArg2->GetType() != Symbol::eLabel) { this->Err(L"AddStat: invalid jump destination (Label expected)"); err++; break; }
 				break;
 			default:
-				if (pArg2 != 0) { mpParser->Err(L"AddStat: too much parameters"); err++; break; }
+				if (pArg2 != 0) { this->Err(L"AddStat: too much parameters"); err++; break; }
 				//pDataType = this->AddType(new Void());	// set DataType of DAC result
 		}
 	}
@@ -160,8 +197,33 @@ DACSymbol* const DACGenerator::AddStat(DACSymbol::OpKind const op, Symbol* const
 
 Symbol* const DACGenerator::FindSymbol(wchar_t* const pName)
 {
+	assert(mpParser != 0);
+
+	if (pName == 0 || coco_string_equal(pName, L"")) {
+		this->Err(L"FindSymbol: invalid symbol name");
+		return 0;
+	}
+
 	// return Symbol found in SymbolTable
 	return mSymbolTable.FindSymbol(pName);
+}
+
+Symbol* const DACGenerator::GetSymbol(wchar_t* const pName)
+{
+	assert(mpParser != 0);
+
+	if (pName == 0 || coco_string_equal(pName, L"")) {
+		this->Err(L"GetSymbol: invalid symbol name");
+		return 0;
+	}
+
+	// search for symbol in SymbolTable
+	Symbol* pSymbol = mSymbolTable.FindSymbol(pName);
+	if (pSymbol == 0) {
+		this->Err(L"GetSymbol: undefined symbol '%ls'", pName);
+	}
+
+	return pSymbol;
 }
 
 const SymbolTable& DACGenerator::GetSymbolList() const
@@ -172,6 +234,29 @@ const SymbolTable& DACGenerator::GetSymbolList() const
 const tDACList& DACGenerator::GetDACList() const
 {
 	return mDACList;
+}
+
+void DACGenerator::Err(wchar_t* const format, ...) const
+{
+	assert(mpParser != 0);
+
+	if (format == 0) { return; }
+
+	// get optional parameters
+	va_list paramList;
+	va_start(paramList, format);
+
+	// get message length
+	size_t const msgLength = vswprintf(0, 0, format, paramList) + 1;
+	wchar_t* msg = new wchar_t[msgLength];
+
+	// create message depending on format
+	vswprintf(msg, msgLength, format, paramList);
+
+	// print error message
+	mpParser->errors->Error(mpParser->la->line, mpParser->la->col, msg);
+
+	coco_string_delete(msg);
 }
 
 size_t const DACGenerator::GetErrorCounter() const
