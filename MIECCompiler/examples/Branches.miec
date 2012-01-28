@@ -1,6 +1,6 @@
 (* example with conditional branches *)
 
-PROGRAM Example4
+PROGRAM Branches
 BEGIN_VAR
 	a: Integer;
 	b: Integer;

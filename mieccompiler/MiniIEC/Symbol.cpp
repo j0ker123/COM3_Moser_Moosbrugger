@@ -7,10 +7,7 @@ namespace MIEC {
 Symbol::Symbol(Symbol::tSymbolType const symbolType, wchar_t* const symbolName, DataType* const pDataType)
 	: mType(symbolType), mName(coco_string_create(symbolName)), mpDataType(pDataType)
 {
-	assert(mName != 0 && mName != L"");
-	if (mpDataType == 0) {
-	//assert(mpDataType != 0);
-	}
+	assert(mName != 0 && !coco_string_equal(mName, L""));
 }
 
 Symbol::~Symbol()
@@ -34,14 +31,14 @@ DataType* const Symbol::GetDataType() const
 }
 
 
-ConstSym::ConstSym(DataType* const pDataType, wchar_t* const name, int const val)
+ConstSym::ConstSym(DataType* const pDataType, wchar_t* const name, double const val)
 	: Symbol(Symbol::eConst, name, pDataType), mVal(val)
 {
 	assert(pDataType != 0);
-	assert(name != 0 && name != L"");
+	assert(name != 0 && !coco_string_equal(name, L""));
 }
 
-int ConstSym::GetVal() const
+double const ConstSym::GetVal() const
 {
 	return mVal;
 }
@@ -51,10 +48,10 @@ VarSym::VarSym(DataType* const pDataType, wchar_t* const name, size_t const addr
 	: Symbol(Symbol::eVar, name, pDataType), mAddr(addr)
 {
 	assert(pDataType != 0);
-	assert(name != 0 && name != L"");
+	assert(name != 0 && !coco_string_equal(name, L""));
 }
 
-int VarSym::GetAddr() const
+size_t const VarSym::GetAddr() const
 {
 	return mAddr;
 }

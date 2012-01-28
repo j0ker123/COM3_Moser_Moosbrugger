@@ -107,13 +107,15 @@
     <ClInclude Include="MiniIEC\DataType.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="examples\Branches.miec" />
     <None Include="examples\Divide.miec" />
     <None Include="examples\Example1.miec" />
     <None Include="examples\Example2.miec" />
     <None Include="examples\Example3.miec" />
-    <None Include="examples\Example4.miec" />
     <None Include="examples\Hello.miec" />
+    <None Include="examples\Loops.miec" />
     <None Include="examples\Multiply.miec" />
+    <None Include="examples\Multiply2.miec" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

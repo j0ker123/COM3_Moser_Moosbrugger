@@ -1,0 +1,17 @@
+(* example with loops *)
+
+PROGRAM Loops
+BEGIN_VAR
+	a: Integer;
+	b: Integer;
+END_VAR
+BEGIN
+	a := 0;
+	b := 10;
+	
+	WHILE a + 1 <= b DO
+		print(a);
+		a := a + 2;
+	END
+	
+END

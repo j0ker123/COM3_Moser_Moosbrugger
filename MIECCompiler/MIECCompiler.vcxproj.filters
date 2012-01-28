@@ -105,13 +105,19 @@
     <None Include="examples\Example3.miec">
       <Filter>examples</Filter>
     </None>
-    <None Include="examples\Example4.miec">
-      <Filter>examples</Filter>
-    </None>
     <None Include="examples\Multiply.miec">
       <Filter>examples</Filter>
     </None>
     <None Include="examples\Divide.miec">
+      <Filter>examples</Filter>
+    </None>
+    <None Include="examples\Loops.miec">
+      <Filter>examples</Filter>
+    </None>
+    <None Include="examples\Branches.miec">
+      <Filter>examples</Filter>
+    </None>
+    <None Include="examples\Multiply2.miec">
       <Filter>examples</Filter>
     </None>
   </ItemGroup>

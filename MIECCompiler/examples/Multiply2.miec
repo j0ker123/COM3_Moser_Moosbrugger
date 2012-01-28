@@ -1,0 +1,11 @@
+PROGRAM Multiply2
+BEGIN_VAR
+	a: Integer;
+	b: Integer;
+END_VAR
+BEGIN
+	a := 1;
+	b := a * 2;
+	print(b);
+	print(a);
+END
