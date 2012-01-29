@@ -1,13 +1,18 @@
 (* example with branch errors *)
 
-PROGRAM Example3
+PROGRAM BranchErrors
 	BEGIN_VAR
 		a: Integer;
 		b: Integer;
 	END_VAR
 BEGIN
+	IF THEN
+	IF END
+	
 	IF THEN END
-	IF a = b THEN END
-
-	IF a = b THEN a := b; END
+	IF a = b THEN 
+	END
+	
+	IF b THEN a := b; END
+	IF a> THEN END
 END

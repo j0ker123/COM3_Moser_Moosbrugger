@@ -1,0 +1,25 @@
+(* example with statement errors *)
+
+PROGRAM StatementErrors
+	BEGIN_VAR
+		a: Integer;
+		a: 
+		Integer;
+		b:
+		Bool;
+	END_VAR
+BEGIN
+	a := anton;
+	b := a*2;
+	(* 3 := 1; *)		(* -> END expected *)
+	
+	a * 5;
+	a := a+x;
+	(* a := a > 1; *)	(* -> END expected *)
+
+	print(+);
+	print(peter)
+	(* print(a h); *)	(* -> ignored up to END *)
+	
+	a
+END

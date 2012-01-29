@@ -1,0 +1,18 @@
+(* example with loop errors *)
+
+PROGRAM LoopErrors
+	BEGIN_VAR
+		a: Integer;
+		b: Integer;
+	END_VAR
+BEGIN
+	WHILE DO
+	WHILE END
+	
+	WHILE DO END
+	WHILE a = b DO
+	END
+	
+	WHILE b DO a := b; END
+	WHILE a> DO END
+END
