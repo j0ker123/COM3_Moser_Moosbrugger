@@ -19,6 +19,8 @@ public:
 	DACGenerator(Parser* const pParser);
 	virtual ~DACGenerator();
 
+	static wchar_t* CreateString(wchar_t* const prefix, size_t const number);
+
 	DACLabel* const GetNewLabel();
 
 	DataType* const AddType(DataType* pType);
@@ -32,7 +34,8 @@ public:
 	const SymbolTable& GetSymbolList() const;
 	const tDACList& GetDACList() const;
 
-	void Err(wchar_t* const format, ...) const;
+	void SetLine(size_t const line);
+	void Err(wchar_t* const format, ...);
 	size_t const GetErrorCounter() const;
 
 private:
@@ -44,9 +47,12 @@ private:
 	SymbolTable mSymbolTable;
 	tDACList mDACList;
 
-	size_t mLabelNumber;
+	size_t mLabelNumber;	// current label number
+	size_t mTempVarNumber;
 	DACLabel* mpCurrLabel;
-	size_t mErrorCounter;
+
+	size_t mErrorLine;		// current line parsed
+	size_t mErrorCounter;	// syntax error counter
 };
 
 } // namespace MIEC

@@ -37,17 +37,17 @@ int main(int argc, char* argv[])
 			MIEC::Scanner* pScanner = new MIEC::Scanner( pFile );
 			MIEC::Parser* pParser = new MIEC::Parser( pScanner );
 
+			// front-end (analysis)
 			pParser->Parse();
-			size_t nrParseErrors = pParser->errors->count;
-			size_t nrDACErrors = pParser->pDACGen->GetErrorCounter();
-			wcout << "Parse errors: " << nrParseErrors << endl;
-			wcout << "DAC errors: " << nrDACErrors << endl;
+			size_t const nrSyntaxErrors = pParser->pDACGen->GetErrorCounter();
+			wcout << "Syntax errors: " << nrSyntaxErrors << endl;
 
-			if (nrParseErrors + nrDACErrors == 0) {
+			if (nrSyntaxErrors == 0) {
 				size_t const cNrRegisters = 8;
 				coco_string_merge(fileName, L".iex");
 				MIEC::CodeGenerator codeGen(&(pParser->pDACGen->GetDACList()), cNrRegisters);
 
+				// back-end (synthesis)
 				codeGen.GenerateCode(fileName);
 				wcout << "Code generated: " << fileName << endl;
 			}
@@ -55,8 +55,9 @@ int main(int argc, char* argv[])
 			delete pParser->pDACGen; pParser->pDACGen = 0;
 			delete pParser; pParser = 0;
 			delete pScanner; pScanner = 0;
+
+			fclose(pFile);
 		}
-		fclose(pFile);
 
 		coco_string_delete(fileName);
 		cout << endl;

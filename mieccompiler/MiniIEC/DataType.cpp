@@ -37,17 +37,17 @@ BaseType::eKind const BaseType::GetKind() const
 	return mKind;
 }
 
-Void::Void()
-	: BaseType(BaseType::eInt, L"Void", 0)
+VoidType::VoidType()
+	: BaseType(BaseType::eVoid, L"Void", 0)
 {
 }
 
-Boolean::Boolean()
+BooleanType::BooleanType()
 	: BaseType(BaseType::eBool, L"Boolean", 1)
 {
 }
 
-Integer::Integer()
+IntegerType::IntegerType()
 	: BaseType(BaseType::eInt, L"Integer", 2)
 {
 }

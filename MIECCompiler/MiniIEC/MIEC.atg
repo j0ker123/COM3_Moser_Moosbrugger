@@ -3,24 +3,25 @@
 #include "DACGenerator.h"
 
 COMPILER MIEC
-	
+
 	DACGenerator* pDACGen;
 
 CHARACTERS
-	letter = 'A'..'Z' + 'a'..'z'.
-	digit = "0123456789".
-	cr  = '\r'.
-	lf  = '\n'.
-	tab = '\t'.
+	letter = 'A'..'Z' + 'a'..'z' .
+	digit = "0123456789" .
+	cr  = '\r' .
+	lf  = '\n' .
+	tab = '\t' .
+
 TOKENS
-	ident  = letter {letter | digit}.
-	number = digit {digit}.
-    
+	ident = letter {letter | digit} .
+	number = digit {digit} .
+
 COMMENTS
 	FROM "(*" TO "*)" NESTED
 
 IGNORE cr + lf + tab
-   
+
 PRODUCTIONS
 
 MIEC
@@ -39,9 +40,10 @@ VarDecl
 	  "END_VAR"
 	.
 
-Statements 
-	= Stat 
-	{ Stat }
+Statements
+	= Stat
+	{ Stat
+	}
 	.
 
 Stat									(. Symbol* pSym = 0; .)
@@ -58,13 +60,13 @@ Assignment<Symbol* &pSym>				(. wchar_t* pName; Symbol* pSym1 = 0; .)
 	.
 
 Branch<Symbol* &pSym>					(. DACLabel* pLblElse = pDACGen->GetNewLabel(); DACLabel* pLblNext = pDACGen->GetNewLabel(); .)
-	= "IF"								
+	= "IF"
 	  Condition<pSym>
 	  "THEN"							(. pDACGen->AddStat(DACSymbol::eIfFalseJump, pSym, pLblElse); .)
-	  Statements						
-	  [ "ELSE"							(. pDACGen->AddStat(DACSymbol::eJump, pLblNext, 0); pDACGen->AddLabel(pLblElse); .)	                                       
+	  Statements
+	  [ "ELSE"							(. pDACGen->AddStat(DACSymbol::eJump, pLblNext, 0); pDACGen->AddLabel(pLblElse); .)
 	    Statements						(. pDACGen->AddLabel(pLblNext); .)
-	  ] 
+	  ]
 	  "END"								(. pDACGen->AddLabel(pLblElse); .)
 	.
 
@@ -104,9 +106,9 @@ Term<Symbol* &pSym>						(. DACSymbol::OpKind op = DACSymbol::eUnknown; Symbol* 
 	}
 	.
 
-Fact<Symbol* &pSym>						(. wchar_t* pName; double val; .)
+Fact<Symbol* &pSym>						(. wchar_t* pName; DataObject* pVal; pDACGen->SetLine(t->line); .)
 	= Ident<pName>						(. pSym = pDACGen->GetSymbol(pName); .)
-	| Number<pName, val>				(. pSym = pDACGen->AddSymbol(new ConstSym(pDACGen->AddType(new Integer()), pName, val)); .)
+	| Number<pName, pVal>				(. pSym = pDACGen->AddSymbol(new ConstSym(pDACGen->AddType(new IntegerType()), pName, pVal)); .)
 	| "(" Expr<pSym> ")"
 	.
 
@@ -120,15 +122,15 @@ Relop<DACSymbol::OpKind &op>
 	.
 
 Type<DataType* &pType>
-	= "Integer"							(. pType = pDACGen->AddType(new Integer()); .)
+	= "Integer"							(. pType = pDACGen->AddType(new IntegerType()); .)
 	.
 
 Ident<wchar_t* &pName>
-	= ident								(. pName = t->val; .)
+	= ident								(. pDACGen->SetLine(t->line); pName = t->val; .)
 	.
 
-Number<wchar_t* &pName, double &val>
-	= number							(. pName = t->val; swscanf(t->val, L"%Lf", &val); .)
+Number<wchar_t* &pName, DataObject* &pVal>
+	= number							(. pDACGen->SetLine(t->line); pName = t->val; int val; swscanf(t->val, L"%i", &val); pVal = new IntegerObject(val); .)
 	.
 
 END MIEC .

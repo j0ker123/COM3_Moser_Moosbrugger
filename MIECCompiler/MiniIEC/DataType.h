@@ -35,26 +35,26 @@ private:
 	eKind const mKind;
 };
 
-class Void : public BaseType
+class VoidType : public BaseType
 {
 public:
-	Void();
+	VoidType();
 
 private:
 };
 
-class Boolean : public BaseType
+class BooleanType : public BaseType
 {
 public:
-	Boolean();
+	BooleanType();
 
 private:
 };
 
-class Integer : public BaseType
+class IntegerType : public BaseType
 {
 public:
-	Integer();
+	IntegerType();
 
 private:
 };

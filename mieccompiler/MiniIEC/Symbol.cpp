@@ -31,16 +31,22 @@ DataType* const Symbol::GetDataType() const
 }
 
 
-ConstSym::ConstSym(DataType* const pDataType, wchar_t* const name, double const val)
-	: Symbol(Symbol::eConst, name, pDataType), mVal(val)
+ConstSym::ConstSym(DataType* const pDataType, wchar_t* const name, DataObject* const pVal)
+	: Symbol(Symbol::eConst, name, pDataType), mpVal(pVal)
 {
 	assert(pDataType != 0);
 	assert(name != 0 && !coco_string_equal(name, L""));
+	assert(mpVal != 0);
 }
 
-double const ConstSym::GetVal() const
+ConstSym::~ConstSym()
 {
-	return mVal;
+	delete mpVal;
+}
+
+DataObject* const ConstSym::GetVal() const
+{
+	return mpVal;
 }
 
 
@@ -49,6 +55,10 @@ VarSym::VarSym(DataType* const pDataType, wchar_t* const name, size_t const addr
 {
 	assert(pDataType != 0);
 	assert(name != 0 && !coco_string_equal(name, L""));
+}
+
+VarSym::~VarSym()
+{
 }
 
 size_t const VarSym::GetAddr() const

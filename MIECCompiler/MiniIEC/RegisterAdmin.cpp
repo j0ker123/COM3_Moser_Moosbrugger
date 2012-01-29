@@ -53,7 +53,7 @@ size_t const RegisterAdmin::GetRegister(const Symbol* const pSym)
 	switch (pSym->GetType()) {
 		case Symbol::eConst:
 			// load register with immediate value
-			mpProl16Gen->LoadI(regNr, ((ConstSym*)pSym)->GetVal());
+			mpProl16Gen->LoadI(regNr, *((ConstSym*)pSym)->GetVal());
 			break;
 		case Symbol::eVar:
 			addrRegNr = GetRegister();

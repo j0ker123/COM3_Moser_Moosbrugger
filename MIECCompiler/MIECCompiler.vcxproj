@@ -98,6 +98,7 @@
     <ClInclude Include="MiniIEC\CodeGenProl16.h" />
     <ClInclude Include="MiniIEC\DACGenerator.h" />
     <ClInclude Include="MiniIEC\DACSymbol.h" />
+    <ClInclude Include="MiniIEC\DataObject.h" />
     <ClInclude Include="MiniIEC\GlobalDef.h" />
     <ClInclude Include="MiniIEC\Parser.h" />
     <ClInclude Include="MiniIEC\RegisterAdmin.h" />

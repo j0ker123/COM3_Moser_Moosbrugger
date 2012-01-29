@@ -1,6 +1,8 @@
 #ifndef SYMBOL_H_
 #define SYMBOL_H_
 
+#include "DataObject.h"
+
 namespace MIEC {
 
 class DataType;
@@ -32,22 +34,24 @@ private:
 class ConstSym : public Symbol
 {
 public:
-	ConstSym(DataType* const pDataType, wchar_t* const name, double const val);
+	ConstSym(DataType* const pDataType, wchar_t* const name, DataObject* const pVal);
+	virtual ~ConstSym();
 
-	double const GetVal() const;
+	DataObject* const GetVal() const;
 
 private:
 	ConstSym();
 	ConstSym(const ConstSym&);
 	ConstSym& operator= (const ConstSym&);
 
-	double const mVal;
+	DataObject* const mpVal;
 };
 
 class VarSym : public Symbol
 {
 public:
 	VarSym(DataType* const pDataType, wchar_t* const name, size_t const addr);
+	virtual ~VarSym();
 
 	size_t const GetAddr() const;
 

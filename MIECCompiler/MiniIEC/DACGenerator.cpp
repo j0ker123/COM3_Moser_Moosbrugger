@@ -6,7 +6,7 @@
 namespace MIEC {
 
 DACGenerator::DACGenerator(Parser* const pParser)
-	: mpParser(pParser), mpCurrLabel(0), mLabelNumber(0), mErrorCounter(0)
+	: mpParser(pParser), mpCurrLabel(0), mTempVarNumber(0), mLabelNumber(0), mErrorLine(0), mErrorCounter(0)
 {
 	assert(mpParser != 0);
 }
@@ -18,7 +18,7 @@ DACGenerator::~DACGenerator()
 	// will be deleted by mSymbolTable destructor.
 }
 
-wchar_t* CreateString(wchar_t* const prefix, size_t const number)
+wchar_t* DACGenerator::CreateString(wchar_t* const prefix, size_t const number)
 {
 	// get destination string length
 	size_t const strLength = swprintf(0, 0, L"%s%d", prefix, number) + 1;
@@ -115,70 +115,79 @@ DACSymbol* const DACGenerator::AddStat(DACSymbol::OpKind const op, Symbol* const
 	DataType* pDataType = 0;	// unknown DataType;
 
 	if (op == DACSymbol::eUnknown) {
-		this->Err(L"AddStat: invalid operation");
+		this->Err(L"AddStat: unknown operation");
 		err++;	// count error
-	}
-	else if (op == DACSymbol::eExit) {
-		pDataType = this->AddType(new Void());	// set DataType of DAC result
 	}
 	else {
 		// check left parameter...
 		switch (op) {
 			case DACSymbol::eAssign:
-				if (pArg1 == 0) { this->Err(L"AddStat: invalid assignment destination"); err++; break; }
+				if (pArg1 == 0) { this->Err(L"Assignment: invalid assignment destination"); err++; break; }
 				if (pArg1->GetType() != Symbol::eVar) { this->Err(L"AddStat: invalid assignment destination '%ls' (Variable expected)", pArg1->GetName()); err++; break; }
 				pDataType = pArg1->GetDataType();	// set DataType of DAC result
 				break;
-			case DACSymbol::ePrint:
-				if (pArg1 == 0) { this->Err(L"AddStat: invalid parameter"); err++; break; }
-				pDataType = this->AddType(new Void());	// set DataType of DAC result
+			case DACSymbol::eAdd: case DACSymbol::eSubtract: case DACSymbol::eMultiply: case DACSymbol::eDivide:
+				if (pArg1 == 0) { this->Err(L"Arithmetic: invalid left parameter"); err++; break; }
+				pDataType = pArg1->GetDataType();	// set DataType of DAC result
+				break;
+			case DACSymbol::eIsEqual: case DACSymbol::eIsNotEqual: case DACSymbol::eIsLessEqual: case DACSymbol::eIsGreaterEqual: case DACSymbol::eIsLess: case DACSymbol::eIsGreater:
+				if (pArg1 == 0) { this->Err(L"Comparison: invalid left parameter"); err++; break; }
+				pDataType = this->AddType(new BooleanType());	// set DataType of DAC result
 				break;
 			case DACSymbol::eIfJump: case DACSymbol::eIfFalseJump:
-				if (pArg1 == 0) { this->Err(L"AddStat: invalid branch condition"); err++; break; }
-				if (pArg1->GetDataType() != this->AddType(new Boolean())) { this->Err(L"AddStat: invalid condition (type Boolean expected)"); err++; break; }
-				pDataType = this->AddType(new Void());	// set DataType of DAC result
+				if (pArg1 == 0) { this->Err(L"Jump: invalid branch condition"); err++; break; }
+				if (pArg1->GetDataType() != this->AddType(new BooleanType())) { this->Err(L"AddStat: invalid condition (type Boolean expected)"); err++; break; }
+				pDataType = this->AddType(new VoidType());	// set DataType of DAC result
 				break;
 			case DACSymbol::eJump:
-				if (pArg1 == 0) { this->Err(L"AddStat: invalid jump destination"); err++; break; }
+				if (pArg1 == 0) { this->Err(L"Jump: invalid jump destination"); err++; break; }
 				if (pArg1->GetType() != Symbol::eLabel) { this->Err(L"AddStat: invalid jump destination (Label expected)"); err++; break; }
-				pDataType = this->AddType(new Void());	// set DataType of DAC result
+				pDataType = this->AddType(new VoidType());	// set DataType of DAC result
+				break;
+			case DACSymbol::ePrint:
+				if (pArg1 == 0) { this->Err(L"Statement: invalid parameter"); err++; break; }
+				pDataType = this->AddType(new VoidType());	// set DataType of DAC result
+				break;
+			case DACSymbol::eExit:
+				if (pArg1 != 0) { this->Err(L"Statement: too many parameters"); err++; break; }
+				pDataType = this->AddType(new VoidType());	// set DataType of DAC result
 				break;
 			default:
-				if (pArg1 == 0) { this->Err(L"AddStat: invalid left parameter"); err++; break; }
-				pDataType = pArg1->GetDataType();	// set DataType of DAC result
+				this->Err(L"AddStat: unhandled operation");
+				break;
 		}
 
 		// check right parameter...
 		switch (op) {
 			case DACSymbol::eAssign:
-				if (pArg2 == 0) { this->Err(L"AddStat: invalid assignment source"); err++; break; }
+				if (pArg2 == 0) { this->Err(L"Assignment: invalid assignment source"); err++; break; }
 				//break;	// continue to check datatypes
 			case DACSymbol::eAdd: case DACSymbol::eSubtract: case DACSymbol::eMultiply: case DACSymbol::eDivide:
-				if (pArg2 == 0) { this->Err(L"AddStat: invalid right parameter"); err++; break; }
+				if (pArg2 == 0) { this->Err(L"Arithmetic: invalid right parameter"); err++; break; }
 				if (pDataType && pDataType != pArg2->GetDataType()) { this->Err(L"AddStat: incompatible types (left is '%ls', right is '%ls')", pDataType->GetName(), pArg2->GetDataType()->GetName()); err++; break; }
 				break;
 			case DACSymbol::eIsEqual: case DACSymbol::eIsNotEqual: case DACSymbol::eIsLessEqual: case DACSymbol::eIsGreaterEqual: case DACSymbol::eIsLess: case DACSymbol::eIsGreater:
-				if (pArg2 == 0) { this->Err(L"AddStat: invalid right parameter"); err++; break; }
-				pDataType = this->AddType(new Boolean());	// set DataType of DAC result
+				if (pArg2 == 0) { this->Err(L"Comparison: invalid right parameter"); err++; break; }
 				break;
 			case DACSymbol::eIfJump: case DACSymbol::eIfFalseJump:
-				if (pArg2 == 0) { this->Err(L"AddStat: invalid jump destination"); err++; break; }
+				if (pArg2 == 0) { this->Err(L"Jump: invalid jump destination"); err++; break; }
 				if (pArg2->GetType() != Symbol::eLabel) { this->Err(L"AddStat: invalid jump destination (Label expected)"); err++; break; }
 				break;
+			case DACSymbol::eJump: case DACSymbol::ePrint:
+				if (pArg2 != 0) { this->Err(L"Statement: too many parameters"); err++; break; }
+				break;
 			default:
-				if (pArg2 != 0) { this->Err(L"AddStat: too much parameters"); err++; break; }
-				//pDataType = this->AddType(new Void());	// set DataType of DAC result
+				break;
 		}
 	}
 
 	// if an error occured...
-	if (err > 0) { 
-		mErrorCounter += err;	// increase error counter
-		return 0;				// don't create DAC with errors
+	if (err > 0) {
+		return 0;	// don't create DAC with errors
 	}
 
 	// get unique consecutive name for DAC result containing temporary variable
-	wchar_t* pName = CreateString(L"$t", mDACList.size());
+	wchar_t* pName = CreateString(L"$t", mTempVarNumber++);
 
 	// create new DACSymbol and link DACLabel (if one is registered)
 	DACSymbol* pStat = new DACSymbol(pDataType, pName, op, pArg1, pArg2, mpCurrLabel);
@@ -236,7 +245,12 @@ const tDACList& DACGenerator::GetDACList() const
 	return mDACList;
 }
 
-void DACGenerator::Err(wchar_t* const format, ...) const
+void DACGenerator::SetLine(size_t const line)
+{
+	mErrorLine = line;
+}
+
+void DACGenerator::Err(wchar_t* const format, ...)
 {
 	assert(mpParser != 0);
 
@@ -254,14 +268,21 @@ void DACGenerator::Err(wchar_t* const format, ...) const
 	vswprintf(msg, msgLength, format, paramList);
 
 	// print error message
-	mpParser->errors->Error(mpParser->la->line, mpParser->la->col, msg);
+	//mpParser->errors->Error(mpParser->la->line, mpParser->la->col, msg);
+	// more precise error localization by using mErrorLine
+	wprintf(L"-- line %i: %ls\n", mErrorLine, msg);
+
+	// count syntax error
+	mErrorCounter++;
 
 	coco_string_delete(msg);
 }
 
 size_t const DACGenerator::GetErrorCounter() const
 {
-	return mErrorCounter;
+	assert(mpParser != 0);
+
+	return mErrorCounter + mpParser->errors->count;
 }
 
 } // namespace MIEC
