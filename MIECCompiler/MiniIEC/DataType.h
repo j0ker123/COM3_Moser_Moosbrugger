@@ -8,12 +8,16 @@ namespace MIEC {
 class DataType : public Symbol
 {
 public:
-	DataType(wchar_t* const name, size_t const size);
 	virtual ~DataType();
 
 	size_t const GetSize();
 
+protected:
+	DataType(wchar_t* const name, size_t const size);
+
 private:
+	DataType();
+
 	size_t const mSize;
 };
 
@@ -38,7 +42,10 @@ private:
 class VoidType : public BaseType
 {
 public:
+	static wchar_t* const Name;
+
 	VoidType();
+	virtual ~VoidType();
 
 private:
 };
@@ -46,7 +53,10 @@ private:
 class BooleanType : public BaseType
 {
 public:
+	static wchar_t* const Name;
+
 	BooleanType();
+	virtual ~BooleanType();
 
 private:
 };
@@ -54,7 +64,10 @@ private:
 class IntegerType : public BaseType
 {
 public:
+	static wchar_t* const Name;
+
 	IntegerType();
+	virtual ~IntegerType();
 
 private:
 };

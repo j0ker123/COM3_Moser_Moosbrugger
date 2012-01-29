@@ -31,11 +31,11 @@ DataType* const Symbol::GetDataType() const
 }
 
 
-ConstSym::ConstSym(DataType* const pDataType, wchar_t* const name, DataObject* const pVal)
-	: Symbol(Symbol::eConst, name, pDataType), mpVal(pVal)
+ConstSym::ConstSym(wchar_t* const pName, DataType* const pDataType, DataObject* const pVal)
+	: Symbol(Symbol::eConst, pName, pDataType), mpVal(pVal)
 {
+	assert(pName != 0 && !coco_string_equal(pName, L""));
 	assert(pDataType != 0);
-	assert(name != 0 && !coco_string_equal(name, L""));
 	assert(mpVal != 0);
 }
 
@@ -50,11 +50,11 @@ DataObject* const ConstSym::GetVal() const
 }
 
 
-VarSym::VarSym(DataType* const pDataType, wchar_t* const name, size_t const addr)
-	: Symbol(Symbol::eVar, name, pDataType), mAddr(addr)
+VarSym::VarSym(wchar_t* const pName, DataType* const pDataType, size_t const addr)
+	: Symbol(Symbol::eVar, pName, pDataType), mAddr(addr)
 {
+	assert(pName != 0 && !coco_string_equal(pName, L""));
 	assert(pDataType != 0);
-	assert(name != 0 && !coco_string_equal(name, L""));
 }
 
 VarSym::~VarSym()

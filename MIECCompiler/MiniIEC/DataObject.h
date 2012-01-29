@@ -8,10 +8,12 @@ namespace MIEC {
 class DataObject
 {
 public:
-	DataObject() { }
 	virtual ~DataObject() { }
 
 	virtual operator WORD() const = 0;
+
+protected:
+	DataObject() { }
 
 private:
 };

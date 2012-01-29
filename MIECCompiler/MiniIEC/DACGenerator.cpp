@@ -9,6 +9,12 @@ DACGenerator::DACGenerator(Parser* const pParser)
 	: mpParser(pParser), mpCurrLabel(0), mTempVarNumber(0), mLabelNumber(0), mErrorLine(0), mErrorCounter(0)
 {
 	assert(mpParser != 0);
+
+	// initialization...
+	// register base data types
+	this->AddType(new VoidType());
+	this->AddType(new BooleanType());
+	this->AddType(new IntegerType());
 }
 
 DACGenerator::~DACGenerator()
@@ -45,24 +51,6 @@ DACLabel* const DACGenerator::GetNewLabel()
 	return pLabel;
 }
 
-DataType* const DACGenerator::AddType(DataType* pType)
-{
-	assert(mpParser != 0);
-
-	if (pType == 0) {
-		this->Err(L"AddType: invalid datatype"); 
-		return 0;
-	}
-	wchar_t* pName = pType->GetName();
-	if (pName == 0 || coco_string_equal(pName, L"")) {
-		this->Err(L"AddType: invalid datatype name");
-		return 0;
-	}
-
-	// add DataType to SymbolTable
-	return (DataType*)(mSymbolTable.AddSymbol(pType));
-}
-
 Symbol* const DACGenerator::AddSymbol(Symbol* pSymbol)
 {
 	assert(mpParser != 0);
@@ -82,6 +70,24 @@ Symbol* const DACGenerator::AddSymbol(Symbol* pSymbol)
 
 	// add Symbol to SymbolTable
 	return mSymbolTable.AddSymbol(pSymbol);
+}
+
+DataType* const DACGenerator::AddType(DataType* pType)
+{
+	assert(mpParser != 0);
+
+	if (pType == 0) {
+		this->Err(L"AddType: invalid datatype"); 
+		return 0;
+	}
+	wchar_t* pName = pType->GetName();
+	if (pName == 0 || coco_string_equal(pName, L"")) {
+		this->Err(L"AddType: invalid datatype name");
+		return 0;
+	}
+
+	// add DataType to SymbolTable
+	return (DataType*)(mSymbolTable.AddSymbol(pType));
 }
 
 DACLabel* const DACGenerator::AddLabel(DACLabel* const pLabel)
@@ -132,25 +138,25 @@ DACSymbol* const DACGenerator::AddStat(DACSymbol::OpKind const op, Symbol* const
 				break;
 			case DACSymbol::eIsEqual: case DACSymbol::eIsNotEqual: case DACSymbol::eIsLessEqual: case DACSymbol::eIsGreaterEqual: case DACSymbol::eIsLess: case DACSymbol::eIsGreater:
 				if (pArg1 == 0) { this->Err(L"Comparison: invalid left parameter"); err++; break; }
-				pDataType = this->AddType(new BooleanType());	// set DataType of DAC result
+				pDataType = this->GetType(BooleanType::Name);	// set DataType of DAC result
 				break;
 			case DACSymbol::eIfJump: case DACSymbol::eIfFalseJump:
 				if (pArg1 == 0) { this->Err(L"Jump: invalid branch condition"); err++; break; }
-				if (pArg1->GetDataType() != this->AddType(new BooleanType())) { this->Err(L"AddStat: invalid condition (type Boolean expected)"); err++; break; }
-				pDataType = this->AddType(new VoidType());	// set DataType of DAC result
+				if (pArg1->GetDataType() != this->GetType(BooleanType::Name)) { this->Err(L"AddStat: invalid condition (type Boolean expected)"); err++; break; }
+				pDataType = this->GetType(VoidType::Name);	// set DataType of DAC result
 				break;
 			case DACSymbol::eJump:
 				if (pArg1 == 0) { this->Err(L"Jump: invalid jump destination"); err++; break; }
 				if (pArg1->GetType() != Symbol::eLabel) { this->Err(L"AddStat: invalid jump destination (Label expected)"); err++; break; }
-				pDataType = this->AddType(new VoidType());	// set DataType of DAC result
+				pDataType = this->GetType(VoidType::Name);	// set DataType of DAC result
 				break;
 			case DACSymbol::ePrint:
 				if (pArg1 == 0) { this->Err(L"Statement: invalid parameter"); err++; break; }
-				pDataType = this->AddType(new VoidType());	// set DataType of DAC result
+				pDataType = this->GetType(VoidType::Name);	// set DataType of DAC result
 				break;
 			case DACSymbol::eExit:
 				if (pArg1 != 0) { this->Err(L"Statement: too many parameters"); err++; break; }
-				pDataType = this->AddType(new VoidType());	// set DataType of DAC result
+				pDataType = this->GetType(VoidType::Name);	// set DataType of DAC result
 				break;
 			default:
 				this->Err(L"AddStat: unhandled operation");
@@ -233,6 +239,24 @@ Symbol* const DACGenerator::GetSymbol(wchar_t* const pName)
 	}
 
 	return pSymbol;
+}
+
+DataType* const DACGenerator::GetType(wchar_t* const pName)
+{
+	assert(mpParser != 0);
+
+	if (pName == 0 || coco_string_equal(pName, L"")) {
+		this->Err(L"GetType: invalid type name");
+		return 0;
+	}
+
+	// search for symbol in SymbolTable
+	Symbol* pSymbol = mSymbolTable.FindSymbol(pName);
+	if (pSymbol == 0) {
+		this->Err(L"GetType: undefined type '%ls'", pName);
+	}
+
+	return (DataType*)pSymbol;
 }
 
 const SymbolTable& DACGenerator::GetSymbolList() const

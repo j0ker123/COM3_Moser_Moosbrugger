@@ -34,7 +34,7 @@ private:
 class ConstSym : public Symbol
 {
 public:
-	ConstSym(DataType* const pDataType, wchar_t* const name, DataObject* const pVal);
+	ConstSym(wchar_t* const pName, DataType* const pDataType, DataObject* const pVal);
 	virtual ~ConstSym();
 
 	DataObject* const GetVal() const;
@@ -50,7 +50,7 @@ private:
 class VarSym : public Symbol
 {
 public:
-	VarSym(DataType* const pDataType, wchar_t* const name, size_t const addr);
+	VarSym(wchar_t* const pName, DataType* const pDataType, size_t const addr);
 	virtual ~VarSym();
 
 	size_t const GetAddr() const;

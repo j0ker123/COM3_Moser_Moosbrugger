@@ -34,8 +34,8 @@ MIEC
 
 VarDecl
 	= "BEGIN_VAR"						(. wchar_t* pName; DataType* pType; size_t addr = 0; .)
-	  Ident<pName> ":" Type<pType> ";"	(. pDACGen->AddSymbol(new VarSym(pType, pName, addr)); addr += pType->GetSize(); .)
-	{ Ident<pName> ":" Type<pType> ";"	(. pDACGen->AddSymbol(new VarSym(pType, pName, addr)); addr += pType->GetSize(); .)
+	  Ident<pName> ":" Type<pType> ";"	(. pDACGen->AddSymbol(new VarSym(pName, pType, addr)); addr += pType->GetSize(); .)
+	{ Ident<pName> ":" Type<pType> ";"	(. pDACGen->AddSymbol(new VarSym(pName, pType, addr)); addr += pType->GetSize(); .)
 	}
 	  "END_VAR"
 	.
@@ -106,9 +106,9 @@ Term<Symbol* &pSym>						(. DACSymbol::OpKind op = DACSymbol::eUnknown; Symbol* 
 	}
 	.
 
-Fact<Symbol* &pSym>						(. wchar_t* pName; DataObject* pVal; pDACGen->SetLine(t->line); .)
+Fact<Symbol* &pSym>						(. wchar_t* pName; DataType* pType; DataObject* pVal; pDACGen->SetLine(t->line); .)
 	= Ident<pName>						(. pSym = pDACGen->GetSymbol(pName); .)
-	| Number<pName, pVal>				(. pSym = pDACGen->AddSymbol(new ConstSym(pDACGen->AddType(new IntegerType()), pName, pVal)); .)
+	| Number<pName, pType, pVal>		(. pSym = pDACGen->AddSymbol(new ConstSym(pName, pType, pVal)); .)
 	| "(" Expr<pSym> ")"
 	.
 
@@ -122,15 +122,15 @@ Relop<DACSymbol::OpKind &op>
 	.
 
 Type<DataType* &pType>
-	= "Integer"							(. pType = pDACGen->AddType(new IntegerType()); .)
+	= "Integer"							(. pType = pDACGen->GetType(IntegerType::Name); .)
 	.
 
 Ident<wchar_t* &pName>
 	= ident								(. pDACGen->SetLine(t->line); pName = t->val; .)
 	.
 
-Number<wchar_t* &pName, DataObject* &pVal>
-	= number							(. pDACGen->SetLine(t->line); pName = t->val; int val; swscanf(t->val, L"%i", &val); pVal = new IntegerObject(val); .)
+Number<wchar_t* &pName, DataType* &pType, DataObject* &pVal>
+	= number							(. pDACGen->SetLine(t->line); pName = t->val; pType = pDACGen->GetType(IntegerType::Name); int val; swscanf(t->val, L"%i", &val); pVal = new IntegerObject(val); .)
 	.
 
 END MIEC .

@@ -37,18 +37,36 @@ BaseType::eKind const BaseType::GetKind() const
 	return mKind;
 }
 
+wchar_t* const VoidType::Name = L"Void";
+
 VoidType::VoidType()
-	: BaseType(BaseType::eVoid, L"Void", 0)
+	: BaseType(BaseType::eVoid, VoidType::Name, 0)
 {
 }
+
+VoidType::~VoidType()
+{
+}
+
+wchar_t* const BooleanType::Name = L"Boolean";
 
 BooleanType::BooleanType()
-	: BaseType(BaseType::eBool, L"Boolean", 1)
+	: BaseType(BaseType::eBool, BooleanType::Name, 1)
 {
 }
 
+BooleanType::~BooleanType()
+{
+}
+
+wchar_t* const IntegerType::Name = L"Integer";
+
 IntegerType::IntegerType()
-	: BaseType(BaseType::eInt, L"Integer", 2)
+	: BaseType(BaseType::eInt, IntegerType::Name, 2)
+{
+}
+
+IntegerType::~IntegerType()
 {
 }
 

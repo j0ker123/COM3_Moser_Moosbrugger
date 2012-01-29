@@ -23,13 +23,14 @@ public:
 
 	DACLabel* const GetNewLabel();
 
-	DataType* const AddType(DataType* pType);
 	Symbol* const AddSymbol(Symbol* pSymbol);
+	DataType* const AddType(DataType* pType);
 	DACLabel* const AddLabel(DACLabel* const pLabel);
 	DACSymbol* const AddStat(DACSymbol::OpKind const op, Symbol* const pArg1, Symbol* const pArg2);
 
 	Symbol* const FindSymbol(wchar_t* const pName);
 	Symbol* const GetSymbol(wchar_t* const pName);
+	DataType* const GetType(wchar_t* const pName);
 
 	const SymbolTable& GetSymbolList() const;
 	const tDACList& GetDACList() const;
