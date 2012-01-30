@@ -18,6 +18,8 @@ public:
 	wchar_t* const GetName() const;
 	DataType* const GetDataType() const;
 
+	virtual const wchar_t* const Print() { return this->mName;}
+
 protected:
 	Symbol(tSymbolType const symbolType, wchar_t* const symbolName, DataType* const pDataType);
 

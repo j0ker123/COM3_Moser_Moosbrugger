@@ -14,6 +14,17 @@
 
 using namespace std;
 
+void printDACStack(MIEC::Parser* pParser) {
+	const MIEC::tDACList* const mpDacList = &pParser->pDACGen->GetDACList();
+	
+	MIEC::tDACList::const_iterator itor = mpDacList->begin();
+	for (; itor != mpDacList->end(); itor++) 
+	{
+		MIEC::DACSymbol* sym = *itor;
+		wcout << "-----new DAC-----\n\n" << sym->Print() << "\n" << endl;;
+	}
+}
+
 int main(int argc, char* argv[])
 {	
 	if (argc < 2) {
@@ -54,6 +65,8 @@ int main(int argc, char* argv[])
 				wcout << "Code generated: " << fileName << endl;
 			}
 
+			printDACStack( pParser );
+
 			delete pParser->pDACGen; pParser->pDACGen = 0;
 			delete pParser; pParser = 0;
 			delete pScanner; pScanner = 0;
@@ -65,8 +78,8 @@ int main(int argc, char* argv[])
 		cout << endl;
 	}
 
-	//cout << "Press any key . . .";
-	//getchar();
+	cout << "Press any key . . .";
+	getchar();
 
 	// memory leak dump
 	_CrtDumpMemoryLeaks();

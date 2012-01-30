@@ -33,6 +33,8 @@ public:
 	Symbol* const GetArgument1() const;
 	Symbol* const GetArgument2() const;
 
+	const wchar_t* const Print();
+
 private:
 	DACLabel* const mpLabel;
 	OpKind const mOperation;
