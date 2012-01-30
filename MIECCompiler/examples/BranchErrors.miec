@@ -6,13 +6,12 @@ PROGRAM BranchErrors
 		b: Integer;
 	END_VAR
 BEGIN
-	IF THEN
 	IF END
-	
-	IF THEN END
+	IF THEN
+	END
 	IF a = b THEN 
 	END
 	
 	IF b THEN a := b; END
-	IF a> THEN END
+	IF a> THEN
 END

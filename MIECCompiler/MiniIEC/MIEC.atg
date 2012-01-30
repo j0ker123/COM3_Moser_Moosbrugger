@@ -6,9 +6,14 @@ COMPILER MIEC
 
 	DACGenerator* pDACGen;
 
+	void Err(wchar_t* const msg) {
+		errors->Error(la->line, la->col, msg);
+	}
+
 CHARACTERS
 	letter = 'A'..'Z' + 'a'..'z' .
 	digit = "0123456789" .
+	specialchar = ANY - letter - digit .
 	cr  = '\r' .
 	lf  = '\n' .
 	tab = '\t' .
@@ -16,6 +21,7 @@ CHARACTERS
 TOKENS
 	ident = letter {letter | digit} .
 	number = digit {digit} .
+	symbol = specialchar .
 
 COMMENTS
 	FROM "(*" TO "*)" NESTED
@@ -26,18 +32,26 @@ PRODUCTIONS
 
 MIEC
 	= "PROGRAM" ident					(. pDACGen = new MIEC::DACGenerator(this); .)
-		[ VarDecl ]
+	[ DeclList
+	] 
 	  "BEGIN"
-		Statements
-	  "END"								(. pDACGen->AddStat(DACSymbol::eExit, 0, 0); .)
+	  Statements
+	  SYNC "END"						(. pDACGen->AddStat(DACSymbol::eExit, 0, 0); .)
 	.
 
-VarDecl
-	= "BEGIN_VAR"						(. wchar_t* pName; DataType* pType; size_t addr = 0; .)
-	  Ident<pName> ":" Type<pType> ";"	(. pDACGen->AddSymbol(new VarSym(pName, pType, addr)); addr += pType->GetSize(); .)
-	{ Ident<pName> ":" Type<pType> ";"	(. pDACGen->AddSymbol(new VarSym(pName, pType, addr)); addr += pType->GetSize(); .)
-	}
-	  "END_VAR"
+DeclList
+	= "BEGIN_VAR"						(. size_t addr = 0; .)
+	  VarDecl<addr>
+	{ VarDecl<addr>
+	} 
+	  SYNC "END_VAR"
+	.
+
+VarDecl<size_t &addr>					(. wchar_t* pName = 0; DataType* pType = 0; .)
+	= Ident<pName>
+	  ":"
+	  Type<pType>
+	  ";"								(. if (pDACGen->AddSymbol(new VarSym(pName, pType, addr))) { addr += pType->GetSize(); } .)
 	.
 
 Statements
@@ -47,27 +61,22 @@ Statements
 	.
 
 Stat									(. Symbol* pSym = 0; .)
-	= Assignment<pSym>
-	| Branch<pSym>
+	= SYNC 
+	( Branch<pSym>
 	| Loop<pSym>
 	| Print<pSym>
-	.
-
-Assignment<Symbol* &pSym>				(. wchar_t* pName; Symbol* pSym1 = 0; .)
-	= Ident<pName>						(. pSym = pDACGen->GetSymbol(pName); .)
-	  ":="
-	  Expr<pSym1> ";"					(. pSym = pDACGen->AddStat(DACSymbol::eAssign, pSym, pSym1); .)
-	.
+	| Assignment<pSym>
+	).
 
 Branch<Symbol* &pSym>					(. DACLabel* pLblElse = pDACGen->GetNewLabel(); DACLabel* pLblNext = pDACGen->GetNewLabel(); .)
 	= "IF"
 	  Condition<pSym>
 	  "THEN"							(. pDACGen->AddStat(DACSymbol::eIfFalseJump, pSym, pLblElse); .)
 	  Statements
-	  [ "ELSE"							(. pDACGen->AddStat(DACSymbol::eJump, pLblNext, 0); pDACGen->AddLabel(pLblElse); .)
-	    Statements						(. pDACGen->AddLabel(pLblNext); .)
-	  ]
-	  "END"								(. pDACGen->AddLabel(pLblElse); .)
+	[ "ELSE"							(. pDACGen->AddStat(DACSymbol::eJump, pLblNext, 0); pDACGen->AddLabel(pLblElse); .)
+	  Statements						(. pDACGen->AddLabel(pLblNext); .)
+	] 
+	  SYNC "END"						(. pDACGen->AddLabel(pLblElse); .)
 	.
 
 Loop<Symbol* &pSym>						(. DACLabel* pLblCond = pDACGen->GetNewLabel(); DACLabel* pLblNext = pDACGen->GetNewLabel(); .)
@@ -75,11 +84,20 @@ Loop<Symbol* &pSym>						(. DACLabel* pLblCond = pDACGen->GetNewLabel(); DACLabe
 	  Condition<pSym>
 	  "DO"								(. pDACGen->AddStat(DACSymbol::eIfFalseJump, pSym, pLblNext); .)
 	  Statements						(. pDACGen->AddStat(DACSymbol::eJump, pLblCond, 0); .)
-	  "END"								(. pDACGen->AddLabel(pLblNext); .)
+	  SYNC "END"						(. pDACGen->AddLabel(pLblNext); .)
 	.
 
 Print<Symbol* &pSym>
-	= "print" "(" Expr<pSym> ")" ";"	(. pSym = pDACGen->AddStat(DACSymbol::ePrint, pSym, 0); .)
+	= "print"
+	  '(' Expr<pSym> SYNC ')'
+	  ';'								(. pSym = pDACGen->AddStat(DACSymbol::ePrint, pSym, 0); .)
+	.
+
+Assignment<Symbol* &pSym>				(. wchar_t* pName = 0; Symbol* pSym1 = 0; .)
+	= Ident<pName>						(. pSym = pDACGen->GetSymbol(pName); .)
+	  ":="
+	  Expr<pSym1>
+	  SYNC ';'							(. pSym = pDACGen->AddStat(DACSymbol::eAssign, pSym, pSym1); .)
 	.
 
 Condition<Symbol* &pSym>				(. DACSymbol::OpKind op = DACSymbol::eUnknown; Symbol* pSym1 = 0; .)
@@ -90,8 +108,8 @@ Condition<Symbol* &pSym>				(. DACSymbol::OpKind op = DACSymbol::eUnknown; Symbo
 
 Expr<Symbol* &pSym>						(. DACSymbol::OpKind op = DACSymbol::eUnknown; Symbol* pSym1 = 0; .)
 	= Term<pSym>
-	{ ( "+"								(. op = DACSymbol::eAdd; .)
-	  | "-"								(. op = DACSymbol::eSubtract; .)
+	{ ( '+'								(. op = DACSymbol::eAdd; .)
+	  | '-'								(. op = DACSymbol::eSubtract; .)
 	  )
 	  Term<pSym1>						(. pSym = pDACGen->AddStat(op, pSym, pSym1); .)
 	}
@@ -99,17 +117,18 @@ Expr<Symbol* &pSym>						(. DACSymbol::OpKind op = DACSymbol::eUnknown; Symbol* 
 
 Term<Symbol* &pSym>						(. DACSymbol::OpKind op = DACSymbol::eUnknown; Symbol* pSym1 = 0; .)
 	= Fact<pSym>
-	{ ( "*"								(. op = DACSymbol::eMultiply; .)
-	  | "/"								(. op = DACSymbol::eDivide; .)
+	{ ( '*'								(. op = DACSymbol::eMultiply; .)
+	  | '/'								(. op = DACSymbol::eDivide; .)
 	  )
 	  Fact<pSym1>						(. pSym = pDACGen->AddStat(op, pSym, pSym1); .)
 	}
 	.
 
-Fact<Symbol* &pSym>						(. wchar_t* pName; DataType* pType; DataObject* pVal; pDACGen->SetLine(t->line); .)
-	= Ident<pName>						(. pSym = pDACGen->GetSymbol(pName); .)
-	| Number<pName, pType, pVal>		(. pSym = pDACGen->AddSymbol(new ConstSym(pName, pType, pVal)); .)
-	| "(" Expr<pSym> ")"
+Fact<Symbol* &pSym>
+	= ( ident							(. pSym = pDACGen->GetSymbol(t->val); .)
+	  | number							(. int val; swscanf(t->val, L"%i", &val); pSym = pDACGen->AddSymbol(new ConstSym(t->val, pDACGen->GetType(IntegerType::Name), new IntegerObject(val))); .)
+	  | "(" Expr<pSym> SYNC ")"
+	  )									(. pDACGen->SetLine(t->line); .)
 	.
 
 Relop<DACSymbol::OpKind &op>
@@ -122,15 +141,15 @@ Relop<DACSymbol::OpKind &op>
 	.
 
 Type<DataType* &pType>
-	= "Integer"							(. pType = pDACGen->GetType(IntegerType::Name); .)
+	= ( "Integer"						(. pType = pDACGen->GetType(IntegerType::Name); .)
+	  | ANY								(. Err(L"invalid Type"); pDACGen->SetLine(t->line); .)
+	  )
 	.
 
 Ident<wchar_t* &pName>
-	= ident								(. pDACGen->SetLine(t->line); pName = t->val; .)
-	.
-
-Number<wchar_t* &pName, DataType* &pType, DataObject* &pVal>
-	= number							(. pDACGen->SetLine(t->line); pName = t->val; pType = pDACGen->GetType(IntegerType::Name); int val; swscanf(t->val, L"%i", &val); pVal = new IntegerObject(val); .)
+	= ( ident							(. pName = t->val; .)
+      | (number | symbol)				(. Err(L"invalid Ident"); .)
+	  )									(. pDACGen->SetLine(t->line); .)
 	.
 
 END MIEC .

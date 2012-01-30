@@ -39,8 +39,10 @@ int main(int argc, char* argv[])
 
 			// front-end (analysis)
 			pParser->Parse();
-			size_t const nrSyntaxErrors = pParser->pDACGen->GetErrorCounter();
+			size_t const nrSyntaxErrors = pParser->errors->count;
+			size_t const nrSemanticErrors = pParser->pDACGen->GetErrorCounter();
 			wcout << "Syntax errors: " << nrSyntaxErrors << endl;
+			wcout << "Semantic errors: " << nrSemanticErrors << endl;
 
 			if (nrSyntaxErrors == 0) {
 				size_t const cNrRegisters = 8;

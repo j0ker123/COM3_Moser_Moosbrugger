@@ -26,6 +26,7 @@ Symbol* const SymbolTable::AddSymbol(Symbol* pSymbol)
 	}
 	wchar_t* pName = pSymbol->GetName();
 	if (pName == 0 || coco_string_equal(pName, L"")) {
+		delete pSymbol; pSymbol = 0;
 		return 0;	// invalid symbol name
 	}
 

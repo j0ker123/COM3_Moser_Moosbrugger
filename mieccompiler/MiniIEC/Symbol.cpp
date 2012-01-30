@@ -1,4 +1,3 @@
-#include <assert.h>
 #include "Scanner.h"
 #include "Symbol.h"
 
@@ -7,7 +6,6 @@ namespace MIEC {
 Symbol::Symbol(Symbol::tSymbolType const symbolType, wchar_t* const symbolName, DataType* const pDataType)
 	: mType(symbolType), mName(coco_string_create(symbolName)), mpDataType(pDataType)
 {
-	assert(mName != 0 && !coco_string_equal(mName, L""));
 }
 
 Symbol::~Symbol()
@@ -34,9 +32,6 @@ DataType* const Symbol::GetDataType() const
 ConstSym::ConstSym(wchar_t* const pName, DataType* const pDataType, DataObject* const pVal)
 	: Symbol(Symbol::eConst, pName, pDataType), mpVal(pVal)
 {
-	assert(pName != 0 && !coco_string_equal(pName, L""));
-	assert(pDataType != 0);
-	assert(mpVal != 0);
 }
 
 ConstSym::~ConstSym()
@@ -53,8 +48,6 @@ DataObject* const ConstSym::GetVal() const
 VarSym::VarSym(wchar_t* const pName, DataType* const pDataType, size_t const addr)
 	: Symbol(Symbol::eVar, pName, pDataType), mAddr(addr)
 {
-	assert(pName != 0 && !coco_string_equal(pName, L""));
-	assert(pDataType != 0);
 }
 
 VarSym::~VarSym()

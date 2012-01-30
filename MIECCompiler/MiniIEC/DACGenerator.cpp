@@ -59,16 +59,25 @@ Symbol* const DACGenerator::AddSymbol(Symbol* pSymbol)
 		this->Err(L"AddSymbol: invalid symbol"); 
 		return 0;
 	}
-	wchar_t* pName = pSymbol->GetName();
+	wchar_t* const pName = pSymbol->GetName();
 	if (pName == 0 || coco_string_equal(pName, L"")) {
 		this->Err(L"AddSymbol: invalid symbol name");
+		delete pSymbol; pSymbol = 0;
 		return 0;
 	}
+	DataType* const pDataType = pSymbol->GetDataType();
+	if (pDataType == 0) {
+		this->Err(L"AddSymbol: invalid data type");
+		delete pSymbol; pSymbol = 0;
+		return 0;
+	}
+
+	// check if symbol already declared (in SymbolTable)
 	if (pSymbol->GetType() != Symbol::eConst && mSymbolTable.FindSymbol(pName)) {
 		this->Err(L"AddSymbol: symbol '%ls' already defined", pName);
 	}
 
-	// add Symbol to SymbolTable
+	// add Symbol to SymbolTable (new or already added symbol returned)
 	return mSymbolTable.AddSymbol(pSymbol);
 }
 
@@ -83,14 +92,15 @@ DataType* const DACGenerator::AddType(DataType* pType)
 	wchar_t* pName = pType->GetName();
 	if (pName == 0 || coco_string_equal(pName, L"")) {
 		this->Err(L"AddType: invalid datatype name");
+		delete pType; pType = 0;
 		return 0;
 	}
 
-	// add DataType to SymbolTable
+	// add DataType to SymbolTable (new or already added symbol returned)
 	return (DataType*)(mSymbolTable.AddSymbol(pType));
 }
 
-DACLabel* const DACGenerator::AddLabel(DACLabel* const pLabel)
+DACLabel* const DACGenerator::AddLabel(DACLabel* pLabel)
 {
 	assert(mpParser != 0);
 
@@ -101,6 +111,7 @@ DACLabel* const DACGenerator::AddLabel(DACLabel* const pLabel)
 	wchar_t* pName = pLabel->GetName();
 	if (pName == 0 || coco_string_equal(pName, L"")) {
 		this->Err(L"AddLabel: invalid label name");
+		delete pLabel; pLabel = 0;
 		return 0;
 	}
 
@@ -166,7 +177,7 @@ DACSymbol* const DACGenerator::AddStat(DACSymbol::OpKind const op, Symbol* const
 		// check right parameter...
 		switch (op) {
 			case DACSymbol::eAssign:
-				if (pArg2 == 0) { this->Err(L"Assignment: invalid assignment source"); err++; break; }
+				if (pArg2 == 0) { this->Err(L"Assignment: invalid assignment"); err++; break; }
 				//break;	// continue to check datatypes
 			case DACSymbol::eAdd: case DACSymbol::eSubtract: case DACSymbol::eMultiply: case DACSymbol::eDivide:
 				if (pArg2 == 0) { this->Err(L"Arithmetic: invalid right parameter"); err++; break; }
@@ -296,7 +307,7 @@ void DACGenerator::Err(wchar_t* const format, ...)
 	// more precise error localization by using mErrorLine
 	wprintf(L"-- line %i: %ls\n", mErrorLine, msg);
 
-	// count syntax error
+	// count semantic error
 	mErrorCounter++;
 
 	coco_string_delete(msg);
@@ -306,7 +317,7 @@ size_t const DACGenerator::GetErrorCounter() const
 {
 	assert(mpParser != 0);
 
-	return mErrorCounter + mpParser->errors->count;
+	return mErrorCounter;
 }
 
 } // namespace MIEC

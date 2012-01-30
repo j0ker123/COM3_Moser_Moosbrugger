@@ -25,7 +25,7 @@ public:
 
 	Symbol* const AddSymbol(Symbol* pSymbol);
 	DataType* const AddType(DataType* pType);
-	DACLabel* const AddLabel(DACLabel* const pLabel);
+	DACLabel* const AddLabel(DACLabel* pLabel);
 	DACSymbol* const AddStat(DACSymbol::OpKind const op, Symbol* const pArg1, Symbol* const pArg2);
 
 	Symbol* const FindSymbol(wchar_t* const pName);
