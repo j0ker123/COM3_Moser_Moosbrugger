@@ -1,6 +1,7 @@
 #ifndef SYMBOL_H_
 #define SYMBOL_H_
 
+#include <ostream>
 #include "DataObject.h"
 
 namespace MIEC {
@@ -18,7 +19,7 @@ public:
 	wchar_t* const GetName() const;
 	DataType* const GetDataType() const;
 
-	virtual const wchar_t* const Print() { return this->mName;}
+	virtual void Print(std::wostream& out) const;
 
 protected:
 	Symbol(tSymbolType const symbolType, wchar_t* const symbolName, DataType* const pDataType);

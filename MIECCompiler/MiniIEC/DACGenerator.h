@@ -2,6 +2,7 @@
 #define DACGENERATOR_H_
 
 #include <list>
+#include <ostream>
 #include "DataType.h"
 #include "Symbol.h"
 #include "DACSymbol.h"
@@ -33,7 +34,9 @@ public:
 	DataType* const GetType(wchar_t* const pName);
 
 	const SymbolTable& GetSymbolList() const;
+	void PrintSymbolList(std::wostream& out) const;
 	const tDACList& GetDACList() const;
+	void PrintDACList(std::wostream& out) const;
 
 	void SetLine(size_t const line);
 	void Err(wchar_t* const format, ...);

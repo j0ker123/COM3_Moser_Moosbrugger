@@ -14,17 +14,6 @@
 
 using namespace std;
 
-void printDACStack(MIEC::Parser* pParser) {
-	const MIEC::tDACList* const mpDacList = &pParser->pDACGen->GetDACList();
-	
-	MIEC::tDACList::const_iterator itor = mpDacList->begin();
-	for (; itor != mpDacList->end(); itor++) 
-	{
-		MIEC::DACSymbol* sym = *itor;
-		wcout << "-----new DAC-----\n\n" << sym->Print() << "\n" << endl;;
-	}
-}
-
 int main(int argc, char* argv[])
 {	
 	if (argc < 2) {
@@ -49,23 +38,31 @@ int main(int argc, char* argv[])
 			MIEC::Parser* pParser = new MIEC::Parser( pScanner );
 
 			// front-end (analysis)
+			wcout << "Analysis..." << endl;
 			pParser->Parse();
 			size_t const nrSyntaxErrors = pParser->errors->count;
 			size_t const nrSemanticErrors = pParser->pDACGen->GetErrorCounter();
 			wcout << "Syntax errors: " << nrSyntaxErrors << endl;
 			wcout << "Semantic errors: " << nrSemanticErrors << endl;
 
-			if (nrSyntaxErrors == 0) {
+			// symbol table
+			//wcout << "Symbol-table:" << endl;
+			//pParser->pDACGen->PrintSymbolList(wcout);
+
+			// intermediate language
+			wcout << "Three-address-code:" << endl;
+			pParser->pDACGen->PrintDACList(wcout);
+
+			if (nrSyntaxErrors == 0 && nrSemanticErrors == 0) {
 				size_t const cNrRegisters = 8;
 				coco_string_merge(fileName, L".iex");
 				MIEC::CodeGenerator codeGen(&(pParser->pDACGen->GetDACList()), cNrRegisters);
 
 				// back-end (synthesis)
+				wcout << "Synthesis..." << endl;
 				codeGen.GenerateCode(fileName);
 				wcout << "Code generated: " << fileName << endl;
 			}
-
-			printDACStack( pParser );
 
 			delete pParser->pDACGen; pParser->pDACGen = 0;
 			delete pParser; pParser = 0;
@@ -78,11 +75,11 @@ int main(int argc, char* argv[])
 		cout << endl;
 	}
 
-	cout << "Press any key . . .";
-	getchar();
-
 	// memory leak dump
 	_CrtDumpMemoryLeaks();
+
+	//cout << "Press any key . . .";
+	//getchar();
 
 	return 0;
 }

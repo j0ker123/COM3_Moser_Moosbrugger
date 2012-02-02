@@ -1,4 +1,4 @@
-#include <assert.h>
+#include <iomanip>
 #include "SymbolTable.h"
 
 namespace MIEC {
@@ -55,6 +55,20 @@ Symbol* const SymbolTable::FindSymbol(wchar_t* const pName)
 		return 0;	// undefined symbol
 	}
 	return ret->second;
+}
+
+void SymbolTable::PrintTable(std::wostream& out) const
+{
+	// for each entry...
+	tSymbolList::const_iterator itor = mSymbolList.begin();
+	for (; itor != mSymbolList.end(); itor++) {
+		out << L" " << std::left;
+		// print Key
+		out << std::setw(10) << itor->first << L"\t: ";
+		// print Symbol
+		itor->second->Symbol::Print(out);
+		out << std::endl;
+	}
 }
 
 } // namespace MIEC

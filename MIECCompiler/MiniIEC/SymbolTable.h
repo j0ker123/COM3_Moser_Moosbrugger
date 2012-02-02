@@ -3,6 +3,7 @@
 
 #include <map>
 #include <functional>
+#include <ostream>
 #include "Scanner.h"
 #include "Symbol.h"
 
@@ -26,6 +27,8 @@ public:
 
 	Symbol* const AddSymbol(Symbol* pSymbol);
 	Symbol* const FindSymbol(wchar_t* const pName);
+
+	void PrintTable(std::wostream& out) const;
 
 private:
 	SymbolTable(const SymbolTable&);

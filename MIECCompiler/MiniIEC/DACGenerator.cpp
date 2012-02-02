@@ -72,13 +72,20 @@ Symbol* const DACGenerator::AddSymbol(Symbol* pSymbol)
 		return 0;
 	}
 
-	// check if symbol already declared (in SymbolTable)
-	if (pSymbol->GetType() != Symbol::eConst && mSymbolTable.FindSymbol(pName)) {
-		this->Err(L"AddSymbol: symbol '%ls' already defined", pName);
+	// check if Symbol already declared (in SymbolTable)
+	Symbol* const pExisting = mSymbolTable.FindSymbol(pName);
+	if (pExisting != 0) {
+		if (pSymbol->GetType() != Symbol::eConst) {
+			this->Err(L"AddSymbol: symbol '%ls' already defined", pName);
+		}
+		delete pSymbol; pSymbol = pExisting;
+		return pExisting;
 	}
 
-	// add Symbol to SymbolTable (new or already added symbol returned)
-	return mSymbolTable.AddSymbol(pSymbol);
+	// add Symbol to SymbolTable
+	mSymbolTable.AddSymbol(pSymbol);
+
+	return pSymbol;
 }
 
 DataType* const DACGenerator::AddType(DataType* pType)
@@ -95,9 +102,18 @@ DataType* const DACGenerator::AddType(DataType* pType)
 		delete pType; pType = 0;
 		return 0;
 	}
+	// check if DataType already declared (in SymbolTable)
+	DataType* const pExisting = (DataType*)(mSymbolTable.FindSymbol(pName));
+	if (pExisting != 0) {
+		this->Err(L"AddType: datatype '%ls' already defined", pName);
+		delete pType; pType = pExisting;
+		return pExisting;
+	}
+	
+	// add DataType to SymbolTable
+	mSymbolTable.AddSymbol(pType);
 
-	// add DataType to SymbolTable (new or already added symbol returned)
-	return (DataType*)(mSymbolTable.AddSymbol(pType));
+	return pType;
 }
 
 DACLabel* const DACGenerator::AddLabel(DACLabel* pLabel)
@@ -244,7 +260,7 @@ Symbol* const DACGenerator::GetSymbol(wchar_t* const pName)
 	}
 
 	// search for symbol in SymbolTable
-	Symbol* pSymbol = mSymbolTable.FindSymbol(pName);
+	Symbol* const pSymbol = mSymbolTable.FindSymbol(pName);
 	if (pSymbol == 0) {
 		this->Err(L"GetSymbol: undefined symbol '%ls'", pName);
 	}
@@ -262,9 +278,10 @@ DataType* const DACGenerator::GetType(wchar_t* const pName)
 	}
 
 	// search for symbol in SymbolTable
-	Symbol* pSymbol = mSymbolTable.FindSymbol(pName);
-	if (pSymbol == 0) {
+	Symbol* const pSymbol = mSymbolTable.FindSymbol(pName);
+	if (pSymbol == 0 || pSymbol->GetType() != Symbol::eType) {
 		this->Err(L"GetType: undefined type '%ls'", pName);
+		return 0;
 	}
 
 	return (DataType*)pSymbol;
@@ -275,9 +292,25 @@ const SymbolTable& DACGenerator::GetSymbolList() const
 	return mSymbolTable;
 }
 
+void DACGenerator::PrintSymbolList(std::wostream& out) const
+{
+	// print SymbolTable
+	mSymbolTable.PrintTable(out);
+}
+
 const tDACList& DACGenerator::GetDACList() const
 {
 	return mDACList;
+}
+
+void DACGenerator::PrintDACList(std::wostream& out) const
+{
+	// for each DACSymbol in DACList...
+	tDACList::const_iterator itor = mDACList.begin();
+	for (; itor != mDACList.end(); itor++) {
+		// print DAC
+		(*itor)->Print(out);
+	}
 }
 
 void DACGenerator::SetLine(size_t const line)

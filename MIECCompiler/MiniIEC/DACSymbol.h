@@ -1,6 +1,7 @@
 #ifndef DACSYMBOL_H_
 #define DACSYMBOL_H_
 
+#include <ostream>
 #include "Symbol.h"
 
 namespace MIEC {
@@ -33,7 +34,7 @@ public:
 	Symbol* const GetArgument1() const;
 	Symbol* const GetArgument2() const;
 
-	const wchar_t* const Print();
+	void Print(std::wostream& out) const;
 
 private:
 	DACLabel* const mpLabel;
